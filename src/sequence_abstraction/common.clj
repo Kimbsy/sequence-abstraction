@@ -6,3 +6,9 @@
 (def cultured [245 245 245])
 (def glossy-grape [153 147 178])
 (def sea-green-crayola [68 255 209])
+
+(defn apply-flashing
+  [draw-fn]
+  (fn [{:keys [display] :as s}]
+    (when-not (zero? display)
+      (draw-fn s))))
