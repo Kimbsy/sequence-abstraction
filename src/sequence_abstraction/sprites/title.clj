@@ -4,7 +4,7 @@
             [quip.utils :as qpu]
             [sequence-abstraction.common :as common]))
 
-(defn draw-title
+(defn draw-title-text
   [{:keys [pos color font-small font-large]}]
   (qpsprite/draw-text-sprite
    {:content "the"
@@ -25,6 +25,17 @@
     :font font-large
     :color color}))
 
+(defn draw-title
+  [{[x y :as pos] :pos :as title}]
+  (q/no-stroke)
+  (qpu/fill (nth (iterate qpu/lighten common/jet) 4))
+  (q/rect (+ x 125) y 493 30)
+  (q/rect (- x 33) (+ y 150) 680 30)
+  (draw-title-text (-> title
+                  (assoc :color common/cultured)
+                  (update :pos #(map + % [-3 -3]))))
+  (draw-title-text title))
+
 (defn ->title
   [pos color]
   {:sprite-group :title
@@ -34,8 +45,4 @@
    :font-large   (q/create-font "font/UbuntuMono-Regular.ttf" 120)
    :font-small   (q/create-font "font/UbuntuMono-Regular.ttf" 70)
    :update-fn    identity
-   :draw-fn      (fn [title]
-                   (draw-title (-> title
-                                   (assoc :color common/cultured)
-                                   (update :pos #(map + % [-3 -3]))))
-                                   (draw-title title))})
+   :draw-fn      draw-title})
