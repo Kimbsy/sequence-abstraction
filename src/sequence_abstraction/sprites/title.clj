@@ -8,22 +8,22 @@
   [{:keys [pos color font-small font-large]}]
   (qpsprite/draw-text-sprite
    {:content "the"
-    :pos pos
+    :pos     pos
     :offsets [:left]
-    :font font-small
-    :color color})
+    :font    font-small
+    :color   color})
   (qpsprite/draw-text-sprite
    {:content "Sequence"
-    :pos (map + pos [130 20])
+    :pos     (map + pos [130 20])
     :offsets [:left]
-    :font font-large
-    :color color})
+    :font    font-large
+    :color   color})
   (qpsprite/draw-text-sprite
    {:content "Abstraction"
-    :pos (map + pos [-20 (+ 150 20)])
+    :pos     (map + pos [-20 (+ 150 20)])
     :offsets [:left]
-    :font font-large
-    :color color}))
+    :font    font-large
+    :color   color}))
 
 (defn draw-title
   [{[x y :as pos] :pos :as title}]

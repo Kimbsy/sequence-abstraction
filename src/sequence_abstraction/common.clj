@@ -12,3 +12,13 @@
   (fn [{:keys [display] :as s}]
     (when-not (zero? display)
       (draw-fn s))))
+
+(defn update-sprites-by-pred
+  [{:keys [current-scene] :as state} pred f]
+  (update-in state [:scenes current-scene :sprites]
+             (fn [sprites]
+               (map (fn [s]
+                      (if (pred s)
+                        (f s)
+                        s))
+                    sprites))))
