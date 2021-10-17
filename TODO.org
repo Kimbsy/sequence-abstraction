@@ -1,0 +1,18 @@
+* TODO:
+
+** TODO get more aminos when we need them
+
+** TODO remove old aminos off-screen
+
+** TODO get amino insertion working
+
+** TODO get aminos moving nicely
+
+** TODO start recording scores and combos
+
+** TODO get superfast gameplay loop sorted
+
+** TODO get tutorial sorted
+
+** DONE get aminos moving
+   CLOSED: [2021-10-17 Sun 17:06]

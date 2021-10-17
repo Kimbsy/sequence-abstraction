@@ -49,7 +49,4 @@
   {:sprites (sprites)
    :draw-fn draw-menu
    :update-fn update-menu
-   :mouse-pressed-fns [(fn [state e]
-                         (prn ((juxt :x :y) e))
-                         state)]
    :key-pressed-fns [handle-play]})

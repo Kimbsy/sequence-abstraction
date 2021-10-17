@@ -6,7 +6,7 @@
 (defn draw-fade
   [{[x y] :pos :keys [w h color]}]
   (doseq [i (range h)]
-    (qpu/stroke (conj color (* (/ i h) 255)))
+    (qpu/stroke (conj color (* (/ i h) 2 255)))
     (q/line [x (- (+ y h) i)] [(+ x w) (- (+ y h) i)])))
 
 (defn ->fade

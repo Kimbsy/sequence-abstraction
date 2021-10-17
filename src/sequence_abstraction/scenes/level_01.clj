@@ -7,11 +7,13 @@
             [sequence-abstraction.sprites.amino :as amino]
             [sequence-abstraction.sprites.border :as border]
             [sequence-abstraction.sprites.countdown :as countdown]
+            [sequence-abstraction.sprites.dna :as dna]
             [sequence-abstraction.sprites.fade :as fade]))
 
 (def sprite-layers
   [
    :amino
+   :dna
    :border
    :fade
    :inserter
@@ -40,44 +42,12 @@
   []
   [(countdown/->countdown [(* 0.5 (q/width)) (* 0.2 (q/height))] 12)
 
-   (fade/->fade [200 130] 400 70 common/jet)
+   (fade/->fade [200 0] 400 200 common/jet)
 
-   (border/->border [(+ -85 (* 0.5 (q/width))) 131] (q/height) common/cultured)
+   (border/->border [(+ -85 (* 0.5 (q/width))) 0] (q/height) common/cultured)
    (border/->border [(+ 84 (* 0.5 (q/width))) 375] (q/height) common/cultured)
 
-   ;; trying out some aminos
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 150] :green :left)
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 180] :purple :left)
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 210] :red :left)
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 240] :turquoise :left)
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 270] :turquoise :left)
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 300] :green :left)
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 330] :red :left)
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 360] :green :left)
-
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 390] :green :left)
-   (amino/->amino [(+  40 (* 0.5 (q/width))) 390] :turquoise :right)
-
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 420] :purple :left)
-   (amino/->amino [(+  40 (* 0.5 (q/width))) 420] :red :right)
-
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 450] :red :left)
-   (amino/->amino [(+  40 (* 0.5 (q/width))) 450] :purple :right)
-
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 480] :turquoise :left)
-   (amino/->amino [(+  40 (* 0.5 (q/width))) 480] :green :right)
-
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 510] :red :left)
-   (amino/->amino [(+  40 (* 0.5 (q/width))) 510] :purple :right)
-
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 540] :red :left)
-   (amino/->amino [(+  40 (* 0.5 (q/width))) 540] :purple :right)
-
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 570] :purple :left)
-   (amino/->amino [(+  40 (* 0.5 (q/width))) 570] :red :right)
-
-   (amino/->amino [(+ -40 (* 0.5 (q/width))) 600] :turquoise :left)
-   (amino/->amino [(+  40 (* 0.5 (q/width))) 600] :green :right)])
+   (dna/add-more-aminos (dna/->dna))])
 
 (defn init
   []
