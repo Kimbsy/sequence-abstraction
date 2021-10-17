@@ -1,7 +1,7 @@
 (ns sequence-abstraction.common)
 
 (def metallic-seaweed [8 126 139])
-(def sizzling-red [255 90 95])
+(def sizzling-red [255 90 96])
 (def jet [60 60 60])
 (def cultured [245 245 245])
 (def glossy-grape [153 147 178])
@@ -22,3 +22,15 @@
                         (f s)
                         s))
                     sprites))))
+
+(defn draw-scene-sprites-by-z
+  "Draw each sprite in the current scene using its `:draw-fn` starting
+  with sprites with the lowest `:z-index`, sprites with a `nil` value
+  for `:z-index` are drawn first."
+  [{:keys [current-scene] :as state}]
+  (let [sprites (->> (get-in state [:scenes current-scene :sprites])
+                     (sort-by :z-index))]
+    (doall
+     (map (fn [s]
+            ((:draw-fn s) s))
+          sprites))))

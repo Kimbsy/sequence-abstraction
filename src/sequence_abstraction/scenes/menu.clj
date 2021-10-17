@@ -8,10 +8,8 @@
             [sequence-abstraction.sprites.title :as title]))
 
 (defn draw-menu
-  [{:keys [dark-mode?] :as state}]
-  (if dark-mode?
-    (qpu/background common/jet)
-    (qpu/background common/cultured))
+  [state]
+  (qpu/background common/jet)
   (qpscene/draw-scene-sprites state))
 
 (defn update-menu
