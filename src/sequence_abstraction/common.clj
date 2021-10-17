@@ -27,7 +27,8 @@
   "Draw each sprite in the current scene using its `:draw-fn` in the
   order their `:sprite-group` appears in the `layers` list."
   [{:keys [current-scene] :as state} layers]
-  (let [sprites (get-in state [:scenes current-scene :sprites])]
+  (let [sprites     (get-in state [:scenes current-scene :sprites])
+        unspecified (filter #(not ((set layers) (:sprite-group %))) sprites)]
     (doall
      (map (fn [group]
             (doall
@@ -35,4 +36,8 @@
                     ((:draw-fn s) s))
                   (filter #(= group (:sprite-group %))
                           sprites))))
-          layers))))
+          layers))
+    (doall
+     (map (fn [s]
+            ((:draw-fn s) s))
+          unspecified))))

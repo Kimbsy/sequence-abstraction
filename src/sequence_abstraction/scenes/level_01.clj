@@ -11,9 +11,7 @@
             [sequence-abstraction.sprites.fade :as fade]))
 
 (def sprite-layers
-  [
-   :amino
-   :dna
+  [:dna
    :border
    :fade
    :inserter
