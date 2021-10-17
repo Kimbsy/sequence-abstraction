@@ -23,14 +23,16 @@
                         s))
                     sprites))))
 
-(defn draw-scene-sprites-by-z
-  "Draw each sprite in the current scene using its `:draw-fn` starting
-  with sprites with the lowest `:z-index`, sprites with a `nil` value
-  for `:z-index` are drawn first."
-  [{:keys [current-scene] :as state}]
-  (let [sprites (->> (get-in state [:scenes current-scene :sprites])
-                     (sort-by :z-index))]
+(defn draw-scene-sprites-by-layers
+  "Draw each sprite in the current scene using its `:draw-fn` in the
+  order their `:sprite-group` appears in the `layers` list."
+  [{:keys [current-scene] :as state} layers]
+  (let [sprites (get-in state [:scenes current-scene :sprites])]
     (doall
-     (map (fn [s]
-            ((:draw-fn s) s))
-          sprites))))
+     (map (fn [group]
+            (doall
+             (map (fn [s]
+                    ((:draw-fn s) s))
+                  (filter #(= group (:sprite-group %))
+                          sprites))))
+          layers))))

@@ -5,26 +5,24 @@
             [quip.utils :as qpu]
             [sequence-abstraction.common :as common]
             [sequence-abstraction.sprites.amino :as amino]
-            [sequence-abstraction.sprites.countdown :as countdown]))
+            [sequence-abstraction.sprites.border :as border]
+            [sequence-abstraction.sprites.countdown :as countdown]
+            [sequence-abstraction.sprites.fade :as fade]))
+
+(def sprite-layers
+  [
+   :amino
+   :border
+   :fade
+   :inserter
+   :score
+   :combo
+   :countdown])
 
 (defn draw-level-01
   [{:keys [dark-mode?] :as state}]
-  (if dark-mode?
-    (qpu/background common/jet)
-    (qpu/background common/cultured))
-  (common/draw-scene-sprites-by-z state)
-
-  ;; temp border
-  (q/stroke-weight 3)
-  (qpu/stroke common/cultured)
-  (q/line [(+ -85 (* 0.5 (q/width))) 131] [(+ -85 (* 0.5 (q/width))) (q/height)])
-  (q/line [(+ 85 (* 0.5 (q/width))) 375] [(+ 85 (* 0.5 (q/width))) (q/height)])
-
-  ;; fade under timer
-  (let [h 70]
-    (doseq [i (range h)]
-      (qpu/stroke (conj common/jet (* (/ i h) 255)))
-      (q/line [200 (- 200 i)] [600 (- 200 i)]))))
+  (qpu/background common/jet)
+  (common/draw-scene-sprites-by-layers state sprite-layers))
 
 (defn update-level-01
   [state]
@@ -41,6 +39,11 @@
 (defn sprites
   []
   [(countdown/->countdown [(* 0.5 (q/width)) (* 0.2 (q/height))] 12)
+
+   (fade/->fade [200 130] 400 70 common/jet)
+
+   (border/->border [(+ -85 (* 0.5 (q/width))) 131] (q/height) common/cultured)
+   (border/->border [(+ 84 (* 0.5 (q/width))) 375] (q/height) common/cultured)
 
    ;; trying out some aminos
    (amino/->amino [(+ -40 (* 0.5 (q/width))) 150] :green :left)

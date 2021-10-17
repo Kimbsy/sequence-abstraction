@@ -53,5 +53,4 @@
    :font-large   (q/create-font "font/UbuntuMono-Regular.ttf" 120)
    :font-small   (q/create-font "font/UbuntuMono-Regular.ttf" 70)
    :update-fn    update-countdown
-   :draw-fn      draw-countdown
-   :z-index      10})
+   :draw-fn      draw-countdown})

@@ -7,8 +7,9 @@
 
 (defn ->amino
   [pos color side]
-  (qpsprite/image-sprite
-   :amino
-   pos
-   92 21
-   (image-file color side)))
+  (-> (qpsprite/image-sprite
+       :amino
+       pos
+       92 21
+       (image-file color side))
+      (assoc :z-index 0)))
