@@ -1,6 +1,8 @@
 (ns sequence-abstraction.sprites.amino
   (:require [quip.sprite :as qpsprite]))
 
+(def amino-speed 2)
+
 (defn image-file
   [color side]
   (str "img/" (name color) "-" (name side) ".png"))
@@ -12,7 +14,7 @@
        pos
        92 21
        (image-file color side)
-       :vel [0 2])
+       :vel [0 amino-speed])
       (assoc :z-index 0)))
 
 (def color-map

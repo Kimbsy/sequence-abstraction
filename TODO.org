@@ -1,5 +1,13 @@
 * TODO:
 
+** TODO create buffer for input aminos
+
+** TODO add to buffer with keypresses
+
+** TODO clear buffer on esc? space?
+
+** TODO pair aminos instead of halting if appropriate
+
 ** TODO get more aminos when we need them
 
 ** TODO remove old aminos off-screen

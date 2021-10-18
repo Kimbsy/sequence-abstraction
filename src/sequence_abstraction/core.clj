@@ -7,7 +7,7 @@
 
 (defn setup
   []
-  {})
+  {:halted? false})
 
 (defn cleanup
   [state]

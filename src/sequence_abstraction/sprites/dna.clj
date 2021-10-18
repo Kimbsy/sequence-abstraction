@@ -1,13 +1,16 @@
 (ns sequence-abstraction.sprites.dna
   (:require [quil.core :as q]
             [quip.sprite :as qpsprite]
+            [quip.tween :as qptween]
             [sequence-abstraction.data :as data]
             [sequence-abstraction.sprites.amino :as amino]))
 
 (defn update-dna
   [dna]
   (update dna :aminos (fn [aminos]
-                        (map qpsprite/update-image-sprite aminos))))
+                        (->> aminos
+                             (map qpsprite/update-image-sprite)
+                             (map qptween/update-sprite)))))
 
 (defn draw-dna
   [{:keys [aminos]}]

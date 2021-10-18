@@ -23,6 +23,11 @@
                         s))
                     sprites))))
 
+(defn group-pred
+  [sprite-group]
+  (fn [s]
+    (= sprite-group (:sprite-group s))))
+
 (defn draw-scene-sprites-by-layers
   "Draw each sprite in the current scene using its `:draw-fn` in the
   order their `:sprite-group` appears in the `layers` list."
