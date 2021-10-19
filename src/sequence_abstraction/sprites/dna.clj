@@ -2,6 +2,7 @@
   (:require [quil.core :as q]
             [quip.sprite :as qpsprite]
             [quip.tween :as qptween]
+            [quip.utils :as qpu]
             [sequence-abstraction.data :as data]
             [sequence-abstraction.sprites.amino :as amino]))
 
@@ -10,11 +11,12 @@
   (update dna :aminos (fn [aminos]
                         (->> aminos
                              (map qpsprite/update-image-sprite)
-                             (map qptween/update-sprite)))))
+                             (map qptween/update-sprite)
+                             (into clojure.lang.PersistentQueue/EMPTY)))))
 
 (defn draw-dna
   [{:keys [aminos]}]
-  (doall (map qpsprite/draw-image-sprite aminos)))
+  (doall (map (fn [a] ((:draw-fn a) a)) aminos)))
 
 (defn starting-pos
   []
@@ -26,7 +28,7 @@
 
 (defn add-amino
   [dna data]
-  (update dna :aminos conj (amino/new-amino data (last-pos dna))))
+  (update dna :aminos conj (amino/new-amino data :left (last-pos dna))))
 
 (defn add-more-aminos
   [dna]
@@ -36,7 +38,6 @@
   []
   {:sprite-group :dna
    :uuid         (java.util.UUID/randomUUID)
-   :pos          [200 200]
    :aminos       clojure.lang.PersistentQueue/EMPTY
    :update-fn    update-dna
    :draw-fn      draw-dna})
