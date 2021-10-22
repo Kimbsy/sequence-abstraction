@@ -9,7 +9,8 @@
             [sequence-abstraction.sprites.border :as border]
             [sequence-abstraction.sprites.countdown :as countdown]
             [sequence-abstraction.sprites.dna :as dna]
-            [sequence-abstraction.sprites.fade :as fade]))
+            [sequence-abstraction.sprites.fade :as fade]
+            [sequence-abstraction.sprites.score :as score]))
 
 (def sprite-layers
   [:dna
@@ -20,7 +21,6 @@
    :control-text
    :inserter
    :score
-   :combo
    :countdown])
 
 (defn draw-level-01
@@ -55,10 +55,21 @@
         state))
     state))
 
+(defn update-scores
+  [{:keys [score combo] :as state}]
+  (common/update-sprites-by-pred
+   state
+   (common/group-pred :score)
+   (fn [s]
+     (-> s
+         (assoc :score score)
+         (assoc :combo combo)))))
+
 (defn update-level-01
   [state]
   (-> state
       check-stop
+      update-scores
       qpscene/update-scene-sprites
       qptween/update-sprite-tweens))
 
@@ -72,6 +83,7 @@
 (defn sprites
   []
   [(countdown/->countdown [(* 0.5 (q/width)) (* 0.2 (q/height))] 12)
+   (score/->score)
 
    (fade/->fade [200 0] (q/width) 200 common/jet)
 
@@ -98,6 +110,27 @@
    (fn [buffer]
      (update buffer :aminos pop))))
 
+(defn update-score
+  [{:keys [combo] :as state}]
+  (-> state
+      (update :score + combo)
+      (update :consecutive-correct inc)))
+
+(def required-correct 3)
+
+(defn update-combo
+  [{:keys [consecutive-correct] :as state}]
+  (if (< required-correct consecutive-correct)
+    (-> state
+        (assoc :consecutive-correct 0)
+        (update :combo * 2))
+    (-> state
+        (update :consecutive-correct inc))))
+
+(defn reset-combo
+  [state]
+  (assoc state :combo common/starting-combo))
+
 (defn handle-amino-input
   "Attempt to add a right-hand amino to the next unpaired left-hand
   amino"
@@ -114,6 +147,8 @@
         (if correct-k
           (-> state
               (assoc :halted? false)
+              update-score
+              update-combo
               (common/update-sprites-by-pred
                (common/group-pred :dna)
                (fn [dna]
@@ -123,7 +158,8 @@
                               (concat (filter :paired? aminos)
                                       (cons updated-a
                                             (rest removed))))))))
-          state))
+          ;;@TODO: make it obvious we've lots our combo
+          (reset-combo state)))
       state)))
 
 (defn init

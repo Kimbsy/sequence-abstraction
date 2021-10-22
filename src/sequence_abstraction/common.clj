@@ -7,6 +7,9 @@
 (def glossy-grape [153 147 178])
 (def sea-green-crayola [68 255 209])
 
+(def starting-score 0)
+(def starting-combo 1)
+
 (defn apply-flashing
   [draw-fn]
   (fn [{:keys [display] :as s}]
