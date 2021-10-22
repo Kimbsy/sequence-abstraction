@@ -8,10 +8,12 @@
 (defn setup
   []
   (qpsound/loop-music "music/menu-music-50.wav")
-  {:halted?             false
-   :score               0
-   :combo               1
-   :consecutive-correct 0})
+  {:halted?       false
+   :score         0
+   :combo         1
+   :correct-combo 0
+   :correct-time  0
+   :playing?      true})
 
 (defn cleanup
   [state]
@@ -30,7 +32,7 @@
     :setup setup
     :on-close cleanup
     :init-scenes-fn init-scenes
-    :current-scene :level-01}))
+    :current-scene :menu}))
 
 (defn -main
   [& args]

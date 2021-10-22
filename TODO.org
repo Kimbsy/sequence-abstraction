@@ -4,11 +4,13 @@
 
 ** TODO add x2's
 
-** TODO get superfast gameplay loop sorted
+** TODO add "reticule"
 
 ** TODO get aminos moving nicely
 
 ** TODO get tutorial sorted
+
+** TODO fancy up the menu
 
 ** DONE get aminos moving
    CLOSED: [2021-10-17 Sun 17:06]
@@ -22,3 +24,5 @@
    CLOSED: [2021-10-22 Fri 21:07]
 ** DONE remove old aminos off-screen
    CLOSED: [2021-10-22 Fri 21:07]
+** DONE get superfast gameplay loop sorted
+   CLOSED: [2021-10-22 Fri 22:44]

@@ -6,12 +6,18 @@
             [quip.tween :as qptween]
             [quip.utils :as qpu]
             [sequence-abstraction.common :as common]
+            [sequence-abstraction.sprites.fade :as fade]
             [sequence-abstraction.sprites.title :as title]))
+
+(def sprite-layers
+  [:fade
+   :text
+   :play-text])
 
 (defn draw-menu
   [state]
   (qpu/background common/jet)
-  (qpscene/draw-scene-sprites state))
+  (common/draw-scene-sprites-by-layers state sprite-layers))
 
 (defn update-menu
   [state]
@@ -25,14 +31,16 @@
     (-> (qpsprite/text-sprite
          "press <SPACE> to play"
          [(* 0.48 (q/width)) (* 0.77 (q/height))]
-         :color common/cultured)
+         :color common/cultured
+         :size 50)
         (assoc :display 1)
         (update :draw-fn common/apply-flashing))
     (qptween/->tween
      :display
      -1
      :repeat-times ##Inf
-     :easing-fn qptween/ease-sigmoid))])
+     :easing-fn qptween/ease-sigmoid))
+   (fade/->fade [0 (* 0.75 (q/height))] (q/width) 50 common/jet :double? true)])
 
 (defn handle-play
   [state e]
@@ -42,7 +50,11 @@
                         :init-fn (fn [state]
                                    (qpsound/stop-music)
                                    (qpsound/loop-music "music/level-music-50.wav")
-                                   state))
+                                   (common/update-sprites-by-pred
+                                    state
+                                    (common/group-pred :countdown)
+                                    (fn [c]
+                                      (assoc c :prev-time (System/currentTimeMillis))))))
     state))
 
 (defn init

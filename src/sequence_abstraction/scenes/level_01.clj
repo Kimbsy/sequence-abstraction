@@ -1,6 +1,7 @@
 (ns sequence-abstraction.scenes.level-01
   (:require [quil.core :as q]
             [quip.scene :as qpscene]
+            [quip.sound :as qpsound]
             [quip.sprite :as qpsprite]
             [quip.tween :as qptween]
             [quip.utils :as qpu]
@@ -19,14 +20,17 @@
    :fade
    :control-images
    :control-text
-   :inserter
+   :reticule
    :score
    :countdown])
 
 (defn draw-level-01
-  [{:keys [dark-mode?] :as state}]
+  [{:keys [playing?] :as state}]
   (qpu/background common/jet)
-  (common/draw-scene-sprites-by-layers state sprite-layers))
+  (common/draw-scene-sprites-by-layers state sprite-layers)
+
+  (when-not playing?
+    (common/draw-scene-sprites-by-layers state sprite-layers :sprite-key :game-over-sprites)))
 
 (defn stop-aminos
   [{:keys [current-scene] :as state}]
@@ -95,15 +99,45 @@
                              a)))
                     (remove nil?)))))))
 
+(defn check-end
+  [{:keys [current-scene] :as state}]
+  (if (zero? (->> (get-in state [:scenes current-scene :sprites])
+                  (filter (common/group-pred :countdown))
+                  first
+                  :remaining))
+    (assoc state :playing? false)
+    state))
+
+(defn update-game-over-sprite-tweens
+  "Hack to get a second set of sprites which we can update/display when
+  the player loses"
+  [{:keys [current-scene] :as state}]
+  (let [sprites         (get-in state [:scenes current-scene :game-over-sprites])
+        updated-sprites (transduce (comp (map qptween/update-sprite)
+                                         (map qptween/handle-on-yoyos)
+                                         (map qptween/handle-on-repeats)
+                                         (map qptween/handle-on-completes))
+                                   conj
+                                   sprites)
+        cleaned-sprites (qptween/remove-completed-tweens updated-sprites)]
+    (assoc-in state [:scenes current-scene :game-over-sprites]
+              cleaned-sprites)))
+
 (defn update-level-01
-  [state]
-  (-> state
-      check-stop
-      add-new
-      remove-old
-      update-scores
-      qpscene/update-scene-sprites
-      qptween/update-sprite-tweens))
+  [{:keys [playing?] :as state}]
+  (if playing?
+    (-> state
+        check-stop
+        add-new
+        remove-old
+        update-scores
+        qpscene/update-scene-sprites
+        qptween/update-sprite-tweens
+        check-end)
+    ;; wait for input
+    (-> state
+        update-game-over-sprite-tweens
+        )))
 
 (defn inc-remaining
   [state d]
@@ -114,7 +148,7 @@
 
 (defn sprites
   []
-  [(countdown/->countdown [(* 0.5 (q/width)) (* 0.2 (q/height))] 12)
+  [(countdown/->countdown [(* 0.5 (q/width)) (* 0.2 (q/height))] common/starting-time)
    (score/->score)
 
    (fade/->fade [200 0] (q/width) 200 common/jet)
@@ -134,6 +168,26 @@
    (qpsprite/text-sprite "T" [550 387] :color common/cultured)
    (qpsprite/text-sprite "G" [550 417] :color common/cultured)])
 
+(defn game-over-sprites
+  []
+  [(qptween/add-tween
+    (-> (qpsprite/text-sprite
+         "press <SPACE> to play again"
+         [(* 0.48 (q/width)) (* 0.77 (q/height))]
+         :color common/cultured
+         :size 50)
+        (assoc :display 1)
+        (update :draw-fn common/apply-flashing))
+    (qptween/->tween
+     :display
+     -1
+     :repeat-times ##Inf
+     :easing-fn qptween/ease-sigmoid))
+
+   ;; (format "%.2e" (double score))
+
+   (fade/->fade [0 (* 0.75 (q/height))] (q/width) 50 common/jet :double? true)])
+
 (defn remove-amino-from-buffer
   [{:keys [current-scene] :as state}]
   (common/update-sprites-by-pred
@@ -146,18 +200,25 @@
   [{:keys [combo] :as state}]
   (-> state
       (update :score + combo)
-      (update :consecutive-correct inc)))
-
-(def required-correct 3)
+      (update :correct-combo inc)))
 
 (defn update-combo
-  [{:keys [consecutive-correct] :as state}]
-  (if (< required-correct consecutive-correct)
+  [{:keys [correct-combo] :as state}]
+  (if (< common/required-correct-combo correct-combo)
     (-> state
-        (assoc :consecutive-correct 0)
+        (assoc :correct-combo 0)
         (update :combo * 2))
     (-> state
-        (update :consecutive-correct inc))))
+        (update :correct-combo inc))))
+
+(defn update-countdown
+  [{:keys [correct-time] :as state}]
+  (if (< common/required-correct-time correct-time)
+    (-> state
+        (assoc :correct-time 0)
+        (inc-remaining common/time-increment))
+    (-> state
+        (update :correct-time inc))))
 
 (defn reset-combo
   [state]
@@ -166,9 +227,10 @@
 (defn handle-amino-input
   "Attempt to add a right-hand amino to the next unpaired left-hand
   amino"
-  [{:keys [current-scene] :as state} e]
+  [{:keys [playing? current-scene] :as state} e]
   (let [k (get e :key)]
-    (if (#{:c :a :t :g} k)
+    (if (and playing?
+             (#{:c :a :t :g} k))
       (let [{:keys [aminos]} (->> (get-in state [:scenes current-scene :sprites])
                                   (filter (common/group-pred :dna))
                                   first)
@@ -181,6 +243,7 @@
               (assoc :halted? false)
               update-score
               update-combo
+              update-countdown
               (common/update-sprites-by-pred
                (common/group-pred :dna)
                (fn [dna]
@@ -190,15 +253,34 @@
                               (concat (filter :paired? aminos)
                                       (cons updated-a
                                             (rest removed))))))))
-          ;;@TODO: make it obvious we've lots our combo
+          ;;@TODO: make it obvious we've lost our combo
           (reset-combo state)))
       state)))
+
+(defn handle-reset
+  "Reset the level so we can go again"
+  [{:keys [playing? current-scene] :as state} e]
+  (if (and (not playing?)
+           (= :space (:key e)))
+    (do (qpsound/stop-music)
+        (qpsound/loop-music "music/level-music-50.wav")
+        (-> state
+            (assoc-in [:scenes current-scene :sprites] (sprites))
+            (assoc-in [:scenes current-scene :game-over-sprites] (game-over-sprites))
+            (assoc :halted? false)
+            (assoc :score 0)
+            (assoc :combo 0)
+            (assoc :correct-combo 0)
+            (assoc :correct-time 0)
+            (assoc :playing? true)))
+    state))
 
 (defn init
   []
   {:sprites (sprites)
+   :game-over-sprites (game-over-sprites)
    :draw-fn draw-level-01
    :update-fn update-level-01
    :key-pressed-fns [handle-amino-input
-                     (fn [state e] (inc-remaining state 3))]
+                     handle-reset]
    :mouse-pressed-fns [(fn [state e] (prn (:y e) (* 0.6 (q/height))) state)]})

@@ -9,6 +9,12 @@
 
 (def starting-score 0)
 (def starting-combo 1)
+(def starting-time 12)
+
+(def required-correct-combo 3)
+(def required-correct-time 5)
+
+(def time-increment 3)
 
 (defn apply-flashing
   [draw-fn]
@@ -33,9 +39,12 @@
 
 (defn draw-scene-sprites-by-layers
   "Draw each sprite in the current scene using its `:draw-fn` in the
-  order their `:sprite-group` appears in the `layers` list."
-  [{:keys [current-scene] :as state} layers]
-  (let [sprites     (get-in state [:scenes current-scene :sprites])
+  order their `:sprite-group` appears in the `layers` list.
+
+  Optionally accepts a key specifying the name of the sprite
+  collection on the scene (for drawing game-over sprites)."
+  [{:keys [current-scene] :as state} layers & {:keys [sprite-key] :or {sprite-key :sprites}}]
+  (let [sprites     (get-in state [:scenes current-scene sprite-key])
         unspecified (filter #(not ((set layers) (:sprite-group %))) sprites)]
     (doall
      (map (fn [group]
