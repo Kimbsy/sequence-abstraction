@@ -1,8 +1,8 @@
 * TODO:
 
-** TODO get more aminos when we need them
+** TODO add sound effects
 
-** TODO remove old aminos off-screen
+** TODO add x2's
 
 ** TODO get superfast gameplay loop sorted
 
@@ -18,3 +18,7 @@
    CLOSED: [2021-10-22 Fri 12:37]
 ** DONE start recording scores and combos
    CLOSED: [2021-10-22 Fri 13:11]
+** DONE get more aminos when we need them
+   CLOSED: [2021-10-22 Fri 21:07]
+** DONE remove old aminos off-screen
+   CLOSED: [2021-10-22 Fri 21:07]

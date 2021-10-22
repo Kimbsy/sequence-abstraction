@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]))
 
 (def cursor (atom 0))
-(def data-lines (line-seq (io/reader (io/resource "data/big-sequence"))))
+(def data-lines (line-seq (io/reader (io/resource "data/sequence"))))
 
 (defn get-amino-data
   [line-count]

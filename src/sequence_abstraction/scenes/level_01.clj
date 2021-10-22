@@ -65,10 +65,42 @@
          (assoc :score score)
          (assoc :combo combo)))))
 
+(defn add-new
+  "Add more aminos if the last one is close to being on screen"
+  [{:keys [current-scene] :as state}]
+  (let [last-y (->> (get-in state [:scenes current-scene :sprites])
+                    (filter (common/group-pred :dna))
+                    first
+                    dna/last-pos
+                    second)]
+    (if (< -10 last-y)
+      (common/update-sprites-by-pred
+       state
+       (common/group-pred :dna)
+       dna/add-more-aminos)
+      state)))
+
+(defn remove-old
+  "Remove any aminos that are safely off screen"
+  [state]
+  (common/update-sprites-by-pred
+   state
+   (common/group-pred :dna)
+   (fn [dna]
+     (update dna :aminos
+             (fn [aminos]
+               (->> aminos
+                    (map (fn [{[x y] :pos :as a}]
+                           (when (< y (+ 30 (q/height)))
+                             a)))
+                    (remove nil?)))))))
+
 (defn update-level-01
   [state]
   (-> state
       check-stop
+      add-new
+      remove-old
       update-scores
       qpscene/update-scene-sprites
       qptween/update-sprite-tweens))
