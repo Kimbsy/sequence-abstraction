@@ -1,6 +1,7 @@
 (ns sequence-abstraction.scenes.menu
   (:require [quil.core :as q]
             [quip.scene :as qpscene]
+            [quip.sound :as qpsound]
             [quip.sprite :as qpsprite]
             [quip.tween :as qptween]
             [quip.utils :as qpu]
@@ -38,10 +39,10 @@
   (if (= :space (:key e))
     (qpscene/transition state :level-01
                         :transition-length 30
-                        ;; :init-fn (fn [state]
-                        ;;            (qpsound/stop-music)
-                        ;;            (qpsound/loop-music "music/level.wav"))
-                        )
+                        :init-fn (fn [state]
+                                   (qpsound/stop-music)
+                                   (qpsound/loop-music "music/level-music-50.wav")
+                                   state))
     state))
 
 (defn init

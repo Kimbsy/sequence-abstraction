@@ -4,8 +4,6 @@
 
 ** TODO remove old aminos off-screen
 
-** TODO Add music into menu and level
-
 ** TODO start recording scores and combos
 
 ** TODO get superfast gameplay loop sorted
@@ -18,3 +16,5 @@
    CLOSED: [2021-10-17 Sun 17:06]
 ** DONE get amino insertion working
    CLOSED: [2021-10-20 Wed 20:46]
+** DONE Add music into menu and level
+   CLOSED: [2021-10-22 Fri 12:37]

@@ -32,7 +32,7 @@
 
 (defn add-more-aminos
   [dna]
-  (reduce add-amino dna (data/get-amino-data 1)))
+  (reduce add-amino dna (data/get-amino-data 10)))
 
 (defn ->dna
   []
