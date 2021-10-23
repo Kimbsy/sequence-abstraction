@@ -6,6 +6,7 @@
             [quip.tween :as qptween]
             [quip.utils :as qpu]
             [sequence-abstraction.common :as common]
+            [sequence-abstraction.sound :as sound]
             [sequence-abstraction.sprites.amino :as amino]
             [sequence-abstraction.sprites.border :as border]
             [sequence-abstraction.sprites.combo :as combo]
@@ -212,24 +213,29 @@
 (defn update-combo
   [{:keys [correct-combo] :as state}]
   (if (< common/required-correct-combo correct-combo)
-    (-> state
-        (assoc :correct-combo 0)
-        (update :combo * 2)
-        combo/spawn-combo-sprite)
+    (do
+      (sound/combo)
+      (-> state
+          (assoc :correct-combo 0)
+          (update :combo * 2)
+          combo/spawn-combo-sprite))
     (-> state
         (update :correct-combo inc))))
 
 (defn update-countdown
   [{:keys [correct-time] :as state}]
   (if (< common/required-correct-time correct-time)
-    (-> state
-        (assoc :correct-time 0)
-        (inc-remaining common/time-increment))
+    (do
+      (sound/time)
+      (-> state
+          (assoc :correct-time 0)
+          (inc-remaining common/time-increment)))
     (-> state
         (update :correct-time inc))))
 
 (defn reset-combo
   [state]
+  (sound/miss)
   (assoc state :combo common/starting-combo))
 
 (defn handle-amino-input
@@ -246,23 +252,25 @@
             a         (first removed)
             correct-k (= (amino/kw->color k) (:pair-color a))
             updated-a (if correct-k (assoc a :paired? true) a)]
-        (if correct-k
-          (-> state
-              (assoc :halted? false)
-              update-score
-              update-combo
-              update-countdown
-              (common/update-sprites-by-pred
-               (common/group-pred :dna)
-               (fn [dna]
-                 (assoc dna :aminos
-                        (into clojure.lang.PersistentQueue/EMPTY
-                              (map #(assoc % :vel [0 amino/amino-speed]))
-                              (concat (filter :paired? aminos)
-                                      (cons updated-a
-                                            (rest removed))))))))
-          ;;@TODO: make it obvious we've lost our combo
-          (reset-combo state)))
+        (do
+          (sound/blip)
+          (if correct-k
+            (-> state
+                (assoc :halted? false)
+                update-score
+                update-combo
+                update-countdown
+                (common/update-sprites-by-pred
+                 (common/group-pred :dna)
+                 (fn [dna]
+                   (assoc dna :aminos
+                          (into clojure.lang.PersistentQueue/EMPTY
+                                (map #(assoc % :vel [0 amino/amino-speed]))
+                                (concat (filter :paired? aminos)
+                                        (cons updated-a
+                                              (rest removed))))))))
+            ;;@TODO: make it obvious we've lost our combo
+            (reset-combo state))))
       state)))
 
 (defn handle-reset

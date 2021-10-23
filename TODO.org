@@ -1,8 +1,8 @@
 * TODO:
 
-** TODO sort music out :/
+** TODO FIX PERFORMANCE ISSUES
 
-** TODO add sound effects
+** TODO balance sound effects vs music volume
 
 ** TODO add "reticule"
 
@@ -28,3 +28,5 @@
    CLOSED: [2021-10-22 Fri 22:44]
 ** DONE add x2's
    CLOSED: [2021-10-23 Sat 11:38]
+** DONE add sound effects
+   CLOSED: [2021-10-23 Sat 12:20]
