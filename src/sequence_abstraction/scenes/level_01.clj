@@ -8,6 +8,7 @@
             [sequence-abstraction.common :as common]
             [sequence-abstraction.sprites.amino :as amino]
             [sequence-abstraction.sprites.border :as border]
+            [sequence-abstraction.sprites.combo :as combo]
             [sequence-abstraction.sprites.countdown :as countdown]
             [sequence-abstraction.sprites.dna :as dna]
             [sequence-abstraction.sprites.fade :as fade]
@@ -22,7 +23,8 @@
    :control-text
    :reticule
    :score
-   :countdown])
+   :countdown
+   :combo-sprite])
 
 (defn draw-level-01
   [{:keys [playing?] :as state}]
@@ -123,6 +125,10 @@
     (assoc-in state [:scenes current-scene :game-over-sprites]
               cleaned-sprites)))
 
+(defn remove-nil-sprites
+  [{:keys [current-scene] :as state}]
+  (update-in state [:scenes current-scene :sprites] #(remove nil? %)))
+
 (defn update-level-01
   [{:keys [playing?] :as state}]
   (if playing?
@@ -132,6 +138,7 @@
         remove-old
         update-scores
         qpscene/update-scene-sprites
+        remove-nil-sprites
         qptween/update-sprite-tweens
         check-end)
     ;; wait for input
@@ -207,7 +214,8 @@
   (if (< common/required-correct-combo correct-combo)
     (-> state
         (assoc :correct-combo 0)
-        (update :combo * 2))
+        (update :combo * 2)
+        combo/spawn-combo-sprite)
     (-> state
         (update :correct-combo inc))))
 

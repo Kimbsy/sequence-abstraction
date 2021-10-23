@@ -1,8 +1,8 @@
 * TODO:
 
-** TODO add sound effects
+** TODO sort music out :/
 
-** TODO add x2's
+** TODO add sound effects
 
 ** TODO add "reticule"
 
@@ -26,3 +26,5 @@
    CLOSED: [2021-10-22 Fri 21:07]
 ** DONE get superfast gameplay loop sorted
    CLOSED: [2021-10-22 Fri 22:44]
+** DONE add x2's
+   CLOSED: [2021-10-23 Sat 11:38]
