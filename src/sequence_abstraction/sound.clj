@@ -4,8 +4,7 @@
 (def blips
   ["fx/blip1.wav"
    "fx/blip2.wav"
-   "fx/blip3.wav"
-   "fx/blip4.wav"])
+   "fx/blip3.wav"])
 
 (defn blip
   []
@@ -15,9 +14,9 @@
   []
   (qpsound/play "fx/combo.wav"))
 
-(defn time
+(defn countdown
   []
-  (qpsound/play "fx/time.wav"))
+  (qpsound/play "fx/countdown.wav"))
 
 (defn miss
   []

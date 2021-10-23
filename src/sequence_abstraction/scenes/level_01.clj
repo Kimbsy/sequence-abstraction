@@ -226,7 +226,7 @@
   [{:keys [correct-time] :as state}]
   (if (< common/required-correct-time correct-time)
     (do
-      (sound/time)
+      (sound/countdown)
       (-> state
           (assoc :correct-time 0)
           (inc-remaining common/time-increment)))
