@@ -53,10 +53,10 @@
   [{:keys [current-scene halted?] :as state}]
   (if-not halted?
     (let [unpaired (->> (get-in state [:scenes current-scene :sprites])
-                      (filter #(= :dna (:sprite-group %)))
-                      first
-                      :aminos
-                      (remove :paired?))]
+                        (filter #(= :dna (:sprite-group %)))
+                        first
+                        :aminos
+                        (remove :paired?))]
       (if (some #(< (* 0.6 (q/height)) (second (:pos %))) unpaired)
         (stop-aminos state)
         state))

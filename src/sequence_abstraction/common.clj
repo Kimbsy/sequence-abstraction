@@ -26,10 +26,10 @@
   [{:keys [current-scene] :as state} pred f]
   (update-in state [:scenes current-scene :sprites]
              (fn [sprites]
-               (map (fn [s]
-                      (if (pred s)
-                        (f s)
-                        s))
+               (pmap (fn [s]
+                       (if (pred s)
+                         (f s)
+                         s))
                     sprites))))
 
 (defn group-pred
