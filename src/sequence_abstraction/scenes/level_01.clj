@@ -166,15 +166,26 @@
 
    (dna/add-more-aminos (dna/->dna))
 
-   (qpsprite/image-sprite :control-images [620 320] 92 21 "img/green-right.png")
-   (qpsprite/image-sprite :control-images [620 350] 92 21 "img/red-right.png")
-   (qpsprite/image-sprite :control-images [620 380] 92 21 "img/purple-right.png")
-   (qpsprite/image-sprite :control-images [620 410] 92 21 "img/turquoise-right.png")
+   (qpsprite/image-sprite :control-images [600 300] 92 21 "img/turquoise-left.png")
+   (qpsprite/image-sprite :control-images [600 330] 92 21 "img/purple-left.png")
+   (qpsprite/image-sprite :control-images [600 360] 92 21 "img/red-left.png")
+   (qpsprite/image-sprite :control-images [600 390] 92 21 "img/green-left.png")
 
-   (qpsprite/text-sprite "C" [550 327] :color common/cultured)
-   (qpsprite/text-sprite "A" [550 357] :color common/cultured)
-   (qpsprite/text-sprite "T" [550 387] :color common/cultured)
-   (qpsprite/text-sprite "G" [550 417] :color common/cultured)])
+   (qpsprite/text-sprite "G" [530 307] :color common/cultured)
+   (qpsprite/text-sprite "T" [530 337] :color common/cultured)
+   (qpsprite/text-sprite "A" [530 367] :color common/cultured)
+   (qpsprite/text-sprite "C" [530 397] :color common/cultured)
+
+   (qpsprite/image-sprite :control-images [680 300] 92 21 "img/green-right.png")
+   (qpsprite/image-sprite :control-images [680 330] 92 21 "img/red-right.png")
+   (qpsprite/image-sprite :control-images [680 360] 92 21 "img/purple-right.png")
+   (qpsprite/image-sprite :control-images [680 390] 92 21 "img/turquoise-right.png")
+
+   (qpsprite/text-sprite "C" [750 307] :color common/cultured)
+   (qpsprite/text-sprite "A" [750 337] :color common/cultured)
+   (qpsprite/text-sprite "T" [750 367] :color common/cultured)
+   (qpsprite/text-sprite "G" [750 397] :color common/cultured)
+])
 
 (defn game-over-sprites
   []

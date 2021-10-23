@@ -9,7 +9,7 @@
 
 (def starting-score 0)
 (def starting-combo 1)
-(def starting-time 12)
+(def starting-time 40)
 
 (def required-correct-combo 3)
 (def required-correct-time 5)
