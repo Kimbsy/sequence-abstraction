@@ -2,9 +2,9 @@
   (:require [quip.sound :as qpsound]))
 
 (def blips
-  ["fx/blip1.wav"
-   "fx/blip2.wav"
-   "fx/blip3.wav"])
+  ["fx/blip1-quiet.wav"
+   "fx/blip2-quiet.wav"
+   "fx/blip3-quiet.wav"])
 
 (defn blip
   []
@@ -12,12 +12,12 @@
 
 (defn combo
   []
-  (qpsound/play "fx/combo.wav"))
+  (qpsound/play "fx/combo-quiet.wav"))
 
 (defn countdown
   []
-  (qpsound/play "fx/countdown.wav"))
+  (qpsound/play "fx/countdown-quiet.wav"))
 
 (defn miss
   []
-  (qpsound/play "fx/miss.wav"))
+  (qpsound/play "fx/miss-quiet.wav"))
