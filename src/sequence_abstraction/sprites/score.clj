@@ -4,23 +4,24 @@
             [sequence-abstraction.common :as common]))
 
 (defn draw-score-text
-  [{:keys [pos score combo font-large font-small]} color]
+  [{:keys [pos score combo font-large font-small]} color-1 color-2]
   (qpsprite/draw-text-sprite
    {:content (str score)
     :pos     pos
     :offsets [:left :top]
     :font    font-large
-    :color   color})
+    :color   color-1})
   (qpsprite/draw-text-sprite
    {:content (str "x" combo)
     :pos     (map + pos [3 40])
     :offsets [:left :top]
     :font    font-small
-    :color   color}))
+    :color   color-2}))
 
 (defn draw-score
   [s]
-  (draw-score-text s common/cultured))
+  (draw-score-text s common/cultured common/cultured)
+  (draw-score-text (update s :pos #(map + % [1 1])) common/sizzling-red common/sea-green-crayola))
 
 (defn ->score
   []

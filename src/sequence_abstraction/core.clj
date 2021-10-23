@@ -17,8 +17,7 @@
 
 (defn cleanup
   [state]
-  ;; (System/exit 0)
-  )
+#_  (System/exit 0))
 
 (defn init-scenes
   []
