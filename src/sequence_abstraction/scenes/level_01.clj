@@ -11,6 +11,7 @@
             [sequence-abstraction.sprites.amino :as amino]
             [sequence-abstraction.sprites.border :as border]
             [sequence-abstraction.sprites.combo :as combo]
+            [sequence-abstraction.sprites.container :as container]
             [sequence-abstraction.sprites.countdown :as countdown]
             [sequence-abstraction.sprites.dna :as dna]
             [sequence-abstraction.sprites.fade :as fade]
@@ -22,6 +23,7 @@
   [:dna
    :buffer
    :border
+   :container
    :fade
    :control-images
    :control-text
@@ -74,6 +76,16 @@
      (-> s
          (assoc :score (score/clean-score-str score))
          (assoc :combo (score/clean-combo-str combo))))))
+
+(defn update-containers
+  "Set the progress of the combo and time containers"
+  [state]
+  (-> state
+      (common/update-sprites-by-pred
+       (common/group-pred :container)
+       (fn [{:keys [progress-key] :as container}]
+         (let [p (progress-key state)]
+           (assoc container :progress p))))))
 
 (defn add-new
   "Add more aminos if the last one is close to being on screen"
@@ -154,6 +166,7 @@
         add-new
         remove-old
         update-scores
+        update-containers
         qpscene/update-scene-sprites
         remove-nil-sprites
         qptween/update-sprite-tweens
@@ -183,6 +196,36 @@
    (dna/add-more-aminos (dna/->dna))
 
    (reticule/->reticule)
+
+   (container/->container
+    [(* 0.15 (q/width)) (* 0.7 (q/height))]
+    common/glossy-grape
+    :correct-combo
+    common/required-correct-combo)
+
+   (container/->container
+    [(* 0.85 (q/width)) (* 0.7 (q/height))]
+    common/sizzling-red
+    :correct-time
+    common/required-correct-time)
+
+   (fade/->fade [(- (* 0.15 (q/width)) 50) (* 0.95 (q/height))] 100 40 common/jet :double? true)
+   (fade/->fade [(- (* 0.85 (q/width)) 50) (* 0.95 (q/height))] 100 40 common/jet :double? true)
+
+   (qpsprite/text-sprite
+    (str "combo")
+    [(* 0.15 (q/width)) (* 0.97 (q/height))]
+    :color common/cultured
+    :font "font/UbuntuMono-Regular.ttf"
+    :size 50
+    )
+   (qpsprite/text-sprite
+    (str "time")
+    [(* 0.85 (q/width)) (* 0.97 (q/height))]
+    :color common/cultured
+    :font "font/UbuntuMono-Regular.ttf"
+    :size 50
+    )
 
    (qpsprite/image-sprite :control-images [600 100] 92 21 "img/turquoise-left.png")
    (qpsprite/image-sprite :control-images [600 130] 92 21 "img/purple-left.png")
