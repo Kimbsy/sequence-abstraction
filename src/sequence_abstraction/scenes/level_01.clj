@@ -1,5 +1,6 @@
 (ns sequence-abstraction.scenes.level-01
   (:require [quil.core :as q]
+            [quip.delay :as qpdelay]
             [quip.scene :as qpscene]
             [quip.sound :as qpsound]
             [quip.sprite :as qpsprite]
@@ -30,7 +31,9 @@
    :reticule
    :score
    :countdown
-   :combo-sprite])
+   :conversation
+   :combo-sprite
+   :time-sprite])
 
 (defn draw-level-01
   [{:keys [playing?] :as state}]
@@ -89,18 +92,20 @@
 
 (defn add-new
   "Add more aminos if the last one is close to being on screen"
-  [{:keys [current-scene] :as state}]
-  (let [last-y (->> (get-in state [:scenes current-scene :sprites])
-                    (filter (common/group-pred :dna))
-                    first
-                    dna/last-pos
-                    second)]
-    (if (< -10 last-y)
-      (common/update-sprites-by-pred
-       state
-       (common/group-pred :dna)
-       dna/add-more-aminos)
-      state)))
+  [{:keys [intro? current-scene] :as state}]
+  (if intro?
+    state
+    (let [last-y (->> (get-in state [:scenes current-scene :sprites])
+                      (filter (common/group-pred :dna))
+                      first
+                      dna/last-pos
+                      second)]
+      (if (< -10 last-y)
+        (common/update-sprites-by-pred
+         state
+         (common/group-pred :dna)
+         dna/add-more-aminos)
+        state))))
 
 (defn remove-old
   "Remove any aminos that are safely off screen"
@@ -118,16 +123,18 @@
                     (remove nil?)))))))
 
 (defn check-end
-  [{:keys [current-scene score] :as state}]
-  (if (zero? (->> (get-in state [:scenes current-scene :sprites])
-                  (filter (common/group-pred :countdown))
-                  first
-                  :remaining))
-    (do
-      (data/save-score! score)
-      (-> state
-          (assoc :playing? false)))
-    state))
+  [{:keys [intro? current-scene score] :as state}]
+  (if intro?
+    state
+    (if (zero? (->> (get-in state [:scenes current-scene :sprites])
+                    (filter (common/group-pred :countdown))
+                    (map :remaining)
+                    (apply max)))
+      (do
+        (data/save-score! score)
+        (-> state
+            (assoc :playing? false)))
+      state)))
 
 (defn update-game-over-sprites
   "Hack to get a second set of sprites which we can update/display when
@@ -170,7 +177,8 @@
         qpscene/update-scene-sprites
         remove-nil-sprites
         qptween/update-sprite-tweens
-        check-end)
+        check-end
+        qpdelay/update-delays)
     (-> state
         update-game-over-sprites
         update-game-over-sprite-tweens)))
@@ -217,15 +225,13 @@
     [(* 0.15 (q/width)) (* 0.97 (q/height))]
     :color common/cultured
     :font "font/UbuntuMono-Regular.ttf"
-    :size 50
-    )
+    :size 50)
    (qpsprite/text-sprite
     (str "time")
     [(* 0.85 (q/width)) (* 0.97 (q/height))]
     :color common/cultured
     :font "font/UbuntuMono-Regular.ttf"
-    :size 50
-    )
+    :size 50)
 
    (qpsprite/image-sprite :control-images [600 100] 92 21 "img/turquoise-left.png")
    (qpsprite/image-sprite :control-images [600 130] 92 21 "img/purple-left.png")
@@ -245,8 +251,7 @@
    (qpsprite/text-sprite "C" [750 107] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
    (qpsprite/text-sprite "A" [750 137] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
    (qpsprite/text-sprite "T" [750 167] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
-   (qpsprite/text-sprite "G" [750 197] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
-])
+   (qpsprite/text-sprite "G" [750 197] :color common/cultured :font "font/UbuntuMono-Regular.ttf")])
 
 (defn game-over-sprites
   []
@@ -295,22 +300,26 @@
      (update buffer :aminos pop))))
 
 (defn update-score
-  [{:keys [combo] :as state}]
-  (-> state
-      (update :score + combo)
-      (update :correct-combo inc)))
+  [{:keys [combo? combo] :as state}]
+  (if combo?
+    (-> state
+        (update :score + combo)
+        (update :correct-combo inc))
+    (update state :score + combo)))
 
 (defn update-combo
-  [{:keys [correct-combo] :as state}]
-  (if (< common/required-correct-combo correct-combo)
-    (do
-      (sound/combo)
+  [{:keys [combo? correct-combo] :as state}]
+  (if combo?
+    (if (< common/required-correct-combo correct-combo)
+      (do
+        (sound/combo)
+        (-> state
+            (assoc :correct-combo 0)
+            (update :combo * 2)
+            combo/spawn-combo-sprite))
       (-> state
-          (assoc :correct-combo 0)
-          (update :combo * 2)
-          combo/spawn-combo-sprite))
-    (-> state
-        (update :correct-combo inc))))
+          (update :correct-combo inc)))
+    state))
 
 (defn update-countdown
   [{:keys [correct-time] :as state}]
@@ -376,29 +385,305 @@
             state)))
       state)))
 
+(defn do-reset
+  [{:keys [current-scene] :as state}]
+  (do (qpsound/stop-music)
+      (qpsound/loop-music "music/level-music-50.wav")
+      (-> state
+          (assoc-in [:scenes current-scene :sprites] (sprites))
+          (assoc-in [:scenes current-scene :game-over-sprites] (game-over-sprites))
+          (assoc-in [:scenes current-scene :delays] [])
+          (assoc :halted? false)
+          (assoc :score common/starting-score)
+          (assoc :combo common/starting-combo)
+          (assoc :correct-combo 0)
+          (assoc :correct-time 0)
+          (assoc :playing? true))))
+
 (defn handle-reset
   "Reset the level so we can go again"
-  [{:keys [playing? current-scene] :as state} e]
+  [{:keys [playing?] :as state} e]
   (if (and (not playing?)
            (= :space (:key e)))
-    (do (qpsound/stop-music)
-        (qpsound/loop-music "music/level-music-50.wav")
-        (-> state
-            (assoc-in [:scenes current-scene :sprites] (sprites))
-            (assoc-in [:scenes current-scene :game-over-sprites] (game-over-sprites))
-            (assoc :halted? false)
-            (assoc :score common/starting-score)
-            (assoc :combo common/starting-combo)
-            (assoc :correct-combo 0)
-            (assoc :correct-time 0)
-            (assoc :playing? true)))
+    (do-reset state)
     state))
+
+(defn borders
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (update-in
+       [:scenes current-scene :sprites]
+       concat
+       [(qptween/add-tween
+         (border/->border [(+ -85 (* 0.5 (q/width))) (- (q/height))]
+                          (q/height)
+                          common/cultured)
+         (qptween/->tween :pos
+                          (q/height)
+                          :update-fn qptween/tween-y-fn
+                          :step-count 50))
+        (qptween/add-tween
+         (border/->border [(+ 84 (* 0.5 (q/width))) (+ 375 (q/height))]
+                          (q/height)
+                          common/cultured)
+         (qptween/->tween :pos
+                          (- (q/height))
+                          :update-fn qptween/tween-y-fn
+                          :step-count 50))])))
+
+(defn add-reticule
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (update-in
+       [:scenes current-scene :sprites]
+       conj
+       (qptween/add-tween
+        (update (reticule/->reticule)
+                :pos
+                #(map + % [(- (q/width)) 0]))
+        (qptween/->tween
+         :pos
+         (q/width)
+         :step-count 50
+         :update-fn qptween/tween-x-fn)))))
+
+(defn single-amino
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (update-in
+       [:scenes current-scene :sprites]
+       conj
+       (dna/add-amino (dna/->dna) \G))))
+
+(declare after-first-delays)
+
+(defn press-c
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (update-in
+       [:scenes current-scene :sprites]
+       conj
+       (-> (qpsprite/text-sprite
+            "press C to pair\nthis nucleic acid"
+            [(* 0.03 (q/width)) (* 0.3 (q/height))]
+            :color common/cultured
+            :font "font/UbuntuMono-Regular.ttf"
+            :size 30
+            :offsets [:left])
+           (assoc :sprite-group :conversation)))
+      (update-in
+       [:scenes current-scene :key-pressed-fns]
+       conj
+       (fn [{:keys [after-first?] :as event-state} e]
+         (if (and (not after-first?)
+                  (= :c (:key e)))
+           (-> event-state
+               (update-in
+                [:scenes :level-01 :sprites]
+                conj
+                (score/->score))
+               (update-in
+                [:scenes :level-01 :delays]
+                concat
+                (after-first-delays))
+               (assoc :after-first? true))
+           event-state)))))
+
+(defn show-c
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (update-in
+       [:scenes current-scene :sprites]
+       concat
+       [(qpsprite/image-sprite :control-images [600 100] 92 21 "img/turquoise-left.png")
+        (qpsprite/image-sprite :control-images [680 100] 92 21 "img/green-right.png")
+        (qpsprite/text-sprite "G" [530 107] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+        (qpsprite/text-sprite "C" [750 107] :color common/cultured :font "font/UbuntuMono-Regular.ttf")])))
+
+(defn modify-text
+  [state f]
+  (common/update-sprites-by-pred
+   state
+   (common/group-pred :conversation)
+   f))
+
+(defn clear-text
+  [state]
+  (modify-text state #(assoc % :content "")))
+
+(defn delays
+  []
+  (qpdelay/sequential-delays [[0 borders]
+                              [50 add-reticule]
+                              [2 single-amino]
+                              [120 press-c]
+                              [50 show-c]]))
+
+(defn wait-in-reticule
+  [{:keys [current-scene] :as state}]
+  (modify-text state #(assoc % :content "pair acids while\nin the reticule")))
+
+(declare after-combo-delays)
+
+(defn multi-aminos
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (common/update-sprites-by-pred
+       (common/group-pred :dna)
+       (fn [dna]
+         (-> (dna/->dna)
+             (dna/add-amino \G)
+             (dna/add-amino \G)
+             (dna/add-amino \G))))
+      (assoc :combo? true)
+      (update-in
+       [:scenes current-scene :sprites]
+       conj
+       (container/->container
+        [(* 0.15 (q/width)) (* 0.7 (q/height))]
+        common/glossy-grape
+        :correct-combo
+        common/required-correct-combo))
+      (update-in
+       [:scenes current-scene :key-pressed-fns]
+       conj
+       (fn [{:keys [correct-combo] :as event-state} e]
+         (if (and (= :c (:key e))
+                  (zero? correct-combo))
+           (-> event-state
+               (update-in
+                [:scenes :level-01 :sprites]
+                concat
+                [(fade/->fade [(- (* 0.15 (q/width)) 50) (* 0.95 (q/height))]
+                              100 40
+                              common/jet
+                              :double? true)
+                 (qpsprite/text-sprite
+                  (str "combo")
+                  [(* 0.15 (q/width)) (* 0.97 (q/height))]
+                  :color common/cultured
+                  :font "font/UbuntuMono-Regular.ttf"
+                  :size 50)])
+               (update-in
+                [:scenes :level-01 :delays]
+                concat
+                (after-combo-delays)))
+           event-state)))))
+
+(defn after-first-delays
+  []
+  (qpdelay/sequential-delays [[50 wait-in-reticule]
+                              [0 multi-aminos]]))
+
+(defn show-a
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (update-in
+       [:scenes current-scene :sprites]
+       concat
+       [(qpsprite/image-sprite :control-images [600 130] 92 21 "img/purple-left.png")
+        (qpsprite/image-sprite :control-images [680 130] 92 21 "img/red-right.png")
+        (qpsprite/text-sprite "T" [530 137] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+        (qpsprite/text-sprite "A" [750 137] :color common/cultured :font "font/UbuntuMono-Regular.ttf")])))
+
+(defn show-t
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (update-in
+       [:scenes current-scene :sprites]
+       concat
+       [(qpsprite/image-sprite :control-images [600 160] 92 21 "img/red-left.png")
+        (qpsprite/image-sprite :control-images [680 160] 92 21 "img/purple-right.png")
+        (qpsprite/text-sprite "A" [530 167] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+        (qpsprite/text-sprite "T" [750 167] :color common/cultured :font "font/UbuntuMono-Regular.ttf")])))
+
+(defn show-g
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (update-in
+       [:scenes current-scene :sprites]
+       concat
+       [(qpsprite/image-sprite :control-images [600 190] 92 21 "img/green-left.png")
+        (qpsprite/image-sprite :control-images [680 190] 92 21 "img/turquoise-right.png")
+        (qpsprite/text-sprite "C" [530 197] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+        (qpsprite/text-sprite "G" [750 197] :color common/cultured :font "font/UbuntuMono-Regular.ttf")])))
+
+(defn more-aminos
+  [state]
+  (-> state
+      (assoc :intro? false)
+      (common/update-sprites-by-pred
+       (common/group-pred :dna)
+       (fn [dna]
+         (-> (dna/->dna)
+             dna/add-more-aminos)))))
+
+(defn key-pressed-fns
+  []
+  [handle-amino-input
+   handle-reset])
+
+(defn extra-time
+  [{:keys [current-scene] :as state}]
+  (-> state
+      (modify-text #(assoc % :content "keep going as\nlong as possible"))
+      (assoc-in
+       [:scenes current-scene :key-pressed-fns]
+       (key-pressed-fns))
+      (update-in
+       [:scenes current-scene :sprites]
+       concat
+       (map
+        (fn [s]
+          (qptween/add-tween
+           s
+           (qptween/->tween
+            :pos
+            (q/height)
+            :update-fn qptween/tween-y-fn
+            :step-count 50)))
+        [(-> (countdown/->countdown [(* 0.5 (q/width)) (- (* 0.2 (q/height)) (q/height))] common/starting-time)
+             (assoc :prev-time (System/currentTimeMillis)))
+         (fade/->fade [200 (- (q/height))] (q/width) 200 common/jet)])
+       (map
+        (fn [s]
+          (qptween/add-tween
+           s
+           (qptween/->tween
+            :pos
+            (- (q/height))
+            :update-fn qptween/tween-y-fn
+            :step-count 50)))
+        [(container/->container
+          [(* 0.85 (q/width)) (+ (* 0.7 (q/height)) (q/height))]
+          common/sizzling-red
+          :correct-time
+          common/required-correct-time)
+         (fade/->fade [(- (* 0.85 (q/width)) 50) (+ (* 0.95 (q/height)) (q/height))]
+                      100 40
+                      common/jet
+                      :double? true)
+         (qpsprite/text-sprite
+          (str "time")
+          [(* 0.85 (q/width)) (+ (* 0.97 (q/height)) (q/height))]
+          :color common/cultured
+          :font "font/UbuntuMono-Regular.ttf"
+          :size 50)]))))
+
+(defn after-combo-delays
+  []
+  (qpdelay/sequential-delays [[50 show-a]
+                              [50 show-t]
+                              [50 show-g]
+                              [100 more-aminos]
+                              [0 extra-time]
+                              [100 clear-text]]))
 
 (defn init
   []
-  {:sprites (sprites)
+  {:sprites           []
+   :delays            (delays)
    :game-over-sprites (game-over-sprites)
-   :draw-fn draw-level-01
-   :update-fn update-level-01
-   :key-pressed-fns [handle-amino-input
-                     handle-reset]})
+   :draw-fn           draw-level-01
+   :update-fn         update-level-01
+   :key-pressed-fns   (key-pressed-fns)})

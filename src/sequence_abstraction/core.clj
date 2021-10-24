@@ -14,7 +14,10 @@
    :combo         common/starting-combo
    :correct-combo 0
    :correct-time  0
-   :playing?      true})
+   :playing?      true
+   :intro?        true
+   :after-first?  false
+   :combo?        false})
 
 (defn cleanup
   [state]

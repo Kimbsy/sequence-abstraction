@@ -12,7 +12,7 @@
 (def starting-time 40)
 
 (def required-correct-combo 3)
-(def required-correct-time 5)
+(def required-correct-time 8)
 
 (def time-increment 3)
 

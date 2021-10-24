@@ -20,7 +20,7 @@
 
 (defn starting-pos
   []
-  [(+ -40 (* 0.5 (q/width))) 150])
+  [(+ -40 (* 0.5 (q/width))) 0])
 
 (defn last-pos
   [{:keys [aminos]}]
