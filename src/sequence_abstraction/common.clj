@@ -7,8 +7,8 @@
 (def glossy-grape [153 147 178])
 (def sea-green-crayola [68 255 209])
 
-(def starting-score 0)
-(def starting-combo 1)
+(def starting-score 0N)
+(def starting-combo 1N)
 (def starting-time 40)
 
 (def required-correct-combo 3)

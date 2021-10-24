@@ -3,6 +3,18 @@
             [quip.sprite :as qpsprite]
             [sequence-abstraction.common :as common]))
 
+(defn clean-score-str
+  [score]
+  (if (< 1e32 score)
+    (format "%.30e" (bigdec score))
+    score))
+
+(defn clean-combo-str
+  [combo]
+  (if (< 1e22 combo)
+    (format "%.16e" (bigdec combo))
+    combo))
+
 (defn draw-score-text
   [{:keys [pos score combo font-large font-small]} color-1 color-2]
   (qpsprite/draw-text-sprite

@@ -72,8 +72,8 @@
    (common/group-pred :score)
    (fn [s]
      (-> s
-         (assoc :score score)
-         (assoc :combo combo)))))
+         (assoc :score (score/clean-score-str score))
+         (assoc :combo (score/clean-combo-str combo))))))
 
 (defn add-new
   "Add more aminos if the last one is close to being on screen"

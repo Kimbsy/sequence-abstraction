@@ -24,14 +24,13 @@
   []
   (if-let [scores (previous-scores)]
     (let [highscore (apply max scores)]
-      (cond
-        (< Double/MAX_VALUE highscore) "... too big, sorry"
-        (< 1e16 highscore Double/MAX_VALUE) (format "%.3e" (double highscore))
-        :default highscore))
+      (if (< 1e16 highscore)
+        (format "%.9e" (bigdec highscore))
+        highscore))
     0))
 
 (defn save-score!
   [score]
   (if-let [scores (previous-scores)]
     (spit highscore-file (conj scores score))
-    (spit highscore-file [score])))
+    (spit highscore-file (list score))))
