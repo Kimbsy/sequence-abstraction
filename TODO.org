@@ -1,12 +1,6 @@
 * TODO:
 
-** TODO FIX PERFORMANCE ISSUES
-
 ** TODO get tutorial sorted
-
-** TODO get aminos moving nicely
-
-** TODO fancy up the menu
 
 ** DONE get aminos moving
    CLOSED: [2021-10-17 Sun 17:06]
