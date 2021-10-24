@@ -2,9 +2,9 @@
 
 ** TODO FIX PERFORMANCE ISSUES
 
-** TODO get aminos moving nicely
-
 ** TODO get tutorial sorted
+
+** TODO get aminos moving nicely
 
 ** TODO fancy up the menu
 
@@ -34,3 +34,5 @@
    CLOSED: [2021-10-24 Sun 10:46]
 ** DONE FIX INTEGER OVERFLOW ISSUE!!!
    CLOSED: [2021-10-24 Sun 11:09]
+** DONE use mono font everywhere
+   CLOSED: [2021-10-24 Sun 16:26]

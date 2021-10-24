@@ -31,6 +31,7 @@
             "press <SPACE> to play"
             [(* 0.48 (q/width)) (* 0.77 (q/height))]
             :color common/cultured
+            :font "font/UbuntuMono-Regular.ttf"
             :size 50)
            (assoc :display 1)
            (update :draw-fn common/apply-flashing))

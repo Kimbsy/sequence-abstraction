@@ -188,20 +188,20 @@
    (qpsprite/image-sprite :control-images [600 160] 92 21 "img/red-left.png")
    (qpsprite/image-sprite :control-images [600 190] 92 21 "img/green-left.png")
 
-   (qpsprite/text-sprite "G" [530 107] :color common/cultured)
-   (qpsprite/text-sprite "T" [530 137] :color common/cultured)
-   (qpsprite/text-sprite "A" [530 167] :color common/cultured)
-   (qpsprite/text-sprite "C" [530 197] :color common/cultured)
+   (qpsprite/text-sprite "G" [530 107] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+   (qpsprite/text-sprite "T" [530 137] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+   (qpsprite/text-sprite "A" [530 167] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+   (qpsprite/text-sprite "C" [530 197] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
 
    (qpsprite/image-sprite :control-images [680 100] 92 21 "img/green-right.png")
    (qpsprite/image-sprite :control-images [680 130] 92 21 "img/red-right.png")
    (qpsprite/image-sprite :control-images [680 160] 92 21 "img/purple-right.png")
    (qpsprite/image-sprite :control-images [680 190] 92 21 "img/turquoise-right.png")
 
-   (qpsprite/text-sprite "C" [750 107] :color common/cultured)
-   (qpsprite/text-sprite "A" [750 137] :color common/cultured)
-   (qpsprite/text-sprite "T" [750 167] :color common/cultured)
-   (qpsprite/text-sprite "G" [750 197] :color common/cultured)
+   (qpsprite/text-sprite "C" [750 107] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+   (qpsprite/text-sprite "A" [750 137] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+   (qpsprite/text-sprite "T" [750 167] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
+   (qpsprite/text-sprite "G" [750 197] :color common/cultured :font "font/UbuntuMono-Regular.ttf")
 ])
 
 (defn game-over-sprites
@@ -210,6 +210,7 @@
         (str "highscore: 0")
         [(* 0.065 (q/width)) (* 0.47 (q/height))]
         :color common/cultured
+        :font "font/UbuntuMono-Regular.ttf"
         :size 50
         :offsets [:left])
        (assoc :update-fn
@@ -222,6 +223,7 @@
          "press <SPACE> to play again"
          [(* 0.48 (q/width)) (* 0.77 (q/height))]
          :color common/cultured
+         :font "font/UbuntuMono-Regular.ttf"
          :size 50)
         (assoc :display 1)
         (update :draw-fn common/apply-flashing))
@@ -355,5 +357,4 @@
    :draw-fn draw-level-01
    :update-fn update-level-01
    :key-pressed-fns [handle-amino-input
-                     handle-reset]
-   :mouse-pressed-fns [(fn [state e] (prn (:x e) (:y e)) state)]})
+                     handle-reset]})
