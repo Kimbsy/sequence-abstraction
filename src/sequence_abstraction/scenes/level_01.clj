@@ -126,15 +126,17 @@
   [{:keys [intro? current-scene score] :as state}]
   (if intro?
     state
-    (if (zero? (->> (get-in state [:scenes current-scene :sprites])
-                    (filter (common/group-pred :countdown))
-                    (map :remaining)
-                    (apply max)))
-      (do
-        (data/save-score! score)
-        (-> state
-            (assoc :playing? false)))
-      state)))
+    (let [remaining (some->> (get-in state [:scenes current-scene :sprites])
+                             (filter (common/group-pred :countdown))
+                             first
+                             :remaining)]
+         (if (and remaining
+                  (zero? remaining))
+           (do
+             (data/save-score! score)
+             (-> state
+                 (assoc :playing? false)))
+           state))))
 
 (defn update-game-over-sprites
   "Hack to get a second set of sprites which we can update/display when
@@ -516,8 +518,8 @@
   (qpdelay/sequential-delays [[0 borders]
                               [50 add-reticule]
                               [2 single-amino]
-                              [120 press-c]
-                              [50 show-c]]))
+                              [110 press-c]
+                              [70 show-c]]))
 
 (defn wait-in-reticule
   [{:keys [current-scene] :as state}]
@@ -572,8 +574,8 @@
 
 (defn after-first-delays
   []
-  (qpdelay/sequential-delays [[50 wait-in-reticule]
-                              [0 multi-aminos]]))
+  (qpdelay/sequential-delays [[140 wait-in-reticule]
+                              [100 multi-aminos]]))
 
 (defn show-a
   [{:keys [current-scene] :as state}]
@@ -672,11 +674,11 @@
 
 (defn after-combo-delays
   []
-  (qpdelay/sequential-delays [[50 show-a]
+  (qpdelay/sequential-delays [[140 show-a]
                               [50 show-t]
                               [50 show-g]
                               [100 more-aminos]
-                              [0 extra-time]
+                              [100 extra-time]
                               [100 clear-text]]))
 
 (defn init
