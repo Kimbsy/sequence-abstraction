@@ -13,7 +13,8 @@
             [sequence-abstraction.sprites.countdown :as countdown]
             [sequence-abstraction.sprites.dna :as dna]
             [sequence-abstraction.sprites.fade :as fade]
-            [sequence-abstraction.sprites.score :as score]))
+            [sequence-abstraction.sprites.score :as score]
+            [sequence-abstraction.sprites.time :as time]))
 
 (def sprite-layers
   [:dna
@@ -166,25 +167,25 @@
 
    (dna/add-more-aminos (dna/->dna))
 
-   (qpsprite/image-sprite :control-images [600 300] 92 21 "img/turquoise-left.png")
-   (qpsprite/image-sprite :control-images [600 330] 92 21 "img/purple-left.png")
-   (qpsprite/image-sprite :control-images [600 360] 92 21 "img/red-left.png")
-   (qpsprite/image-sprite :control-images [600 390] 92 21 "img/green-left.png")
+   (qpsprite/image-sprite :control-images [600 100] 92 21 "img/turquoise-left.png")
+   (qpsprite/image-sprite :control-images [600 130] 92 21 "img/purple-left.png")
+   (qpsprite/image-sprite :control-images [600 160] 92 21 "img/red-left.png")
+   (qpsprite/image-sprite :control-images [600 190] 92 21 "img/green-left.png")
 
-   (qpsprite/text-sprite "G" [530 307] :color common/cultured)
-   (qpsprite/text-sprite "T" [530 337] :color common/cultured)
-   (qpsprite/text-sprite "A" [530 367] :color common/cultured)
-   (qpsprite/text-sprite "C" [530 397] :color common/cultured)
+   (qpsprite/text-sprite "G" [530 107] :color common/cultured)
+   (qpsprite/text-sprite "T" [530 137] :color common/cultured)
+   (qpsprite/text-sprite "A" [530 167] :color common/cultured)
+   (qpsprite/text-sprite "C" [530 197] :color common/cultured)
 
-   (qpsprite/image-sprite :control-images [680 300] 92 21 "img/green-right.png")
-   (qpsprite/image-sprite :control-images [680 330] 92 21 "img/red-right.png")
-   (qpsprite/image-sprite :control-images [680 360] 92 21 "img/purple-right.png")
-   (qpsprite/image-sprite :control-images [680 390] 92 21 "img/turquoise-right.png")
+   (qpsprite/image-sprite :control-images [680 100] 92 21 "img/green-right.png")
+   (qpsprite/image-sprite :control-images [680 130] 92 21 "img/red-right.png")
+   (qpsprite/image-sprite :control-images [680 160] 92 21 "img/purple-right.png")
+   (qpsprite/image-sprite :control-images [680 190] 92 21 "img/turquoise-right.png")
 
-   (qpsprite/text-sprite "C" [750 307] :color common/cultured)
-   (qpsprite/text-sprite "A" [750 337] :color common/cultured)
-   (qpsprite/text-sprite "T" [750 367] :color common/cultured)
-   (qpsprite/text-sprite "G" [750 397] :color common/cultured)
+   (qpsprite/text-sprite "C" [750 107] :color common/cultured)
+   (qpsprite/text-sprite "A" [750 137] :color common/cultured)
+   (qpsprite/text-sprite "T" [750 167] :color common/cultured)
+   (qpsprite/text-sprite "G" [750 197] :color common/cultured)
 ])
 
 (defn game-over-sprites
@@ -240,7 +241,8 @@
       (sound/countdown)
       (-> state
           (assoc :correct-time 0)
-          (inc-remaining common/time-increment)))
+          (inc-remaining common/time-increment)
+          time/spawn-time-sprite))
     (-> state
         (update :correct-time inc))))
 
