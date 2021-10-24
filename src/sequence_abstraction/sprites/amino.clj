@@ -2,7 +2,7 @@
   (:require [quil.core :as q]
             [quip.sprite :as qpsprite]))
 
-(def amino-speed 2)
+(def amino-speed 3)
 
 (def char->color
   {\C :green
