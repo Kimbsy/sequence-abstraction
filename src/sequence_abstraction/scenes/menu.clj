@@ -27,19 +27,27 @@
 (defn sprites
   []
   [(title/->title [(* 0.11 (q/width)) (* 0.2 (q/height))] common/sizzling-red)
-   (qptween/add-tween
-    (-> (qpsprite/text-sprite
-         "press <SPACE> to play"
-         [(* 0.48 (q/width)) (* 0.77 (q/height))]
-         :color common/cultured
-         :size 50)
-        (assoc :display 1)
-        (update :draw-fn common/apply-flashing))
-    (qptween/->tween
-     :display
-     -1
-     :repeat-times ##Inf
-     :easing-fn qptween/ease-sigmoid))
+   (-> (-> (qpsprite/text-sprite
+            "press <SPACE> to play"
+            [(* 0.48 (q/width)) (* 0.77 (q/height))]
+            :color common/cultured
+            :size 50)
+           (assoc :display 1)
+           (update :draw-fn common/apply-flashing))
+       (qptween/add-tween
+        (qptween/->tween
+         :display
+         -1
+         :repeat-times ##Inf
+         :easing-fn qptween/ease-sigmoid))
+       (qptween/add-tween
+        (qptween/->tween
+         :pos
+         20
+         :update-fn (fn [[x y] d] [(+ x d) (- y d)])
+         :yoyo-update-fn (fn [[x y] d] [(- x d) (+ y d)])
+         :yoyo? true
+         :repeat-times ##Inf)))
    (fade/->fade [0 (* 0.75 (q/height))] (q/width) 50 common/jet :double? true)])
 
 (defn handle-play
