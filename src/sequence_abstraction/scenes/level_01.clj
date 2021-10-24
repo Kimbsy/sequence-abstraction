@@ -6,6 +6,7 @@
             [quip.tween :as qptween]
             [quip.utils :as qpu]
             [sequence-abstraction.common :as common]
+            [sequence-abstraction.data :as data]
             [sequence-abstraction.sound :as sound]
             [sequence-abstraction.sprites.amino :as amino]
             [sequence-abstraction.sprites.border :as border]
@@ -105,13 +106,26 @@
                     (remove nil?)))))))
 
 (defn check-end
-  [{:keys [current-scene] :as state}]
+  [{:keys [current-scene score] :as state}]
   (if (zero? (->> (get-in state [:scenes current-scene :sprites])
                   (filter (common/group-pred :countdown))
                   first
                   :remaining))
-    (assoc state :playing? false)
+    (do
+      (data/save-score! score)
+      (-> state
+          (assoc :playing? false)))
     state))
+
+(defn update-game-over-sprites
+  "Hack to get a second set of sprites which we can update/display when
+  the player loses"
+  [{:keys [current-scene] :as state}]
+  (update-in state [:scenes current-scene :game-over-sprites]
+             (fn [sprites]
+               (map (fn [s]
+                      ((:update-fn s) s))
+                    sprites))))
 
 (defn update-game-over-sprite-tweens
   "Hack to get a second set of sprites which we can update/display when
@@ -144,10 +158,9 @@
         remove-nil-sprites
         qptween/update-sprite-tweens
         check-end)
-    ;; wait for input
     (-> state
-        update-game-over-sprite-tweens
-        )))
+        update-game-over-sprites
+        update-game-over-sprite-tweens)))
 
 (defn inc-remaining
   [state d]
@@ -193,7 +206,18 @@
 
 (defn game-over-sprites
   []
-  [(qptween/add-tween
+  [(-> (qpsprite/text-sprite
+        (str "highscore: 0")
+        [(* 0.065 (q/width)) (* 0.47 (q/height))]
+        :color common/cultured
+        :size 50
+        :offsets [:left])
+       (assoc :update-fn
+              (fn [s]
+                (assoc s :content (str "highscore: " (data/highscore))))))
+   (fade/->fade [0 (* 0.45 (q/height))] (q/width) 50 common/jet :double? true)
+
+   (qptween/add-tween
     (-> (qpsprite/text-sprite
          "press <SPACE> to play again"
          [(* 0.48 (q/width)) (* 0.77 (q/height))]
@@ -206,10 +230,15 @@
      -1
      :repeat-times ##Inf
      :easing-fn qptween/ease-sigmoid))
-
-   ;; (format "%.2e" (double score))
-
-   (fade/->fade [0 (* 0.75 (q/height))] (q/width) 50 common/jet :double? true)])
+   (qptween/add-tween
+    (-> (fade/->fade [0 (* 0.75 (q/height))] (q/width) 50 common/jet :double? true)
+        (assoc :display 1)
+        (update :draw-fn common/apply-flashing))
+    (qptween/->tween
+     :display
+     -1
+     :repeat-times ##Inf
+     :easing-fn qptween/ease-sigmoid))])
 
 (defn remove-amino-from-buffer
   [{:keys [current-scene] :as state}]
@@ -312,8 +341,8 @@
             (assoc-in [:scenes current-scene :sprites] (sprites))
             (assoc-in [:scenes current-scene :game-over-sprites] (game-over-sprites))
             (assoc :halted? false)
-            (assoc :score 0)
-            (assoc :combo 0)
+            (assoc :score common/starting-score)
+            (assoc :combo common/starting-combo)
             (assoc :correct-combo 0)
             (assoc :correct-time 0)
             (assoc :playing? true)))

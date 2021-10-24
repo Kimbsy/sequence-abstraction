@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [quip.core :as qp]
             [quip.sound :as qpsound]
+            [sequence-abstraction.common :as common]
             [sequence-abstraction.scenes.menu :as menu]
             [sequence-abstraction.scenes.level-01 :as level-01]))
 
@@ -9,15 +10,15 @@
   []
   (qpsound/loop-music "music/menu-music-50.wav")
   {:halted?       false
-   :score         0
-   :combo         1
+   :score         common/starting-score
+   :combo         common/starting-combo
    :correct-combo 0
    :correct-time  0
    :playing?      true})
 
 (defn cleanup
   [state]
-#_  (System/exit 0))
+  (System/exit 0))
 
 (defn init-scenes
   []
