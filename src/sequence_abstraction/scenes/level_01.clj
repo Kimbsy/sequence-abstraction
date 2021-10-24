@@ -13,6 +13,7 @@
             [sequence-abstraction.sprites.countdown :as countdown]
             [sequence-abstraction.sprites.dna :as dna]
             [sequence-abstraction.sprites.fade :as fade]
+            [sequence-abstraction.sprites.reticule :as reticule]
             [sequence-abstraction.sprites.score :as score]
             [sequence-abstraction.sprites.time :as time]))
 
@@ -167,6 +168,8 @@
 
    (dna/add-more-aminos (dna/->dna))
 
+   (reticule/->reticule)
+
    (qpsprite/image-sprite :control-images [600 100] 92 21 "img/turquoise-left.png")
    (qpsprite/image-sprite :control-images [600 130] 92 21 "img/purple-left.png")
    (qpsprite/image-sprite :control-images [600 160] 92 21 "img/red-left.png")
@@ -249,7 +252,11 @@
 (defn reset-combo
   [state]
   (sound/miss)
-  (assoc state :combo common/starting-combo))
+  (-> state
+      (assoc :combo common/starting-combo)
+      (common/update-sprites-by-pred
+       (common/group-pred :reticule)
+       reticule/shake)))
 
 (defn handle-amino-input
   "Attempt to add a right-hand amino to the next unpaired left-hand
@@ -258,32 +265,40 @@
   (let [k (get e :key)]
     (if (and playing?
              (#{:c :a :t :g} k))
-      (let [{:keys [aminos]} (->> (get-in state [:scenes current-scene :sprites])
+      (let [sprites (get-in state [:scenes current-scene :sprites])
+            {:keys [aminos]} (->> sprites
                                   (filter (common/group-pred :dna))
                                   first)
+            reticule (->> sprites
+                          (filter (common/group-pred :reticule))
+                          first)
             removed   (remove :paired? aminos)
             a         (first removed)
-            correct-k (= (amino/kw->color k) (:pair-color a))
-            updated-a (if correct-k (assoc a :paired? true) a)]
+            correct-k? (= (amino/kw->color k) (:pair-color a))
+            in-reticule? (< 290 (second (:pos a)))
+            reticule-ready? (:ready? reticule)
+            good? (and correct-k? in-reticule?)
+            updated-a (if good? (assoc a :paired? true) a)]
         (do
           (sound/blip)
-          (if correct-k
-            (-> state
-                (assoc :halted? false)
-                update-score
-                update-combo
-                update-countdown
-                (common/update-sprites-by-pred
-                 (common/group-pred :dna)
-                 (fn [dna]
-                   (assoc dna :aminos
-                          (into clojure.lang.PersistentQueue/EMPTY
-                                (map #(assoc % :vel [0 amino/amino-speed]))
-                                (concat (filter :paired? aminos)
-                                        (cons updated-a
-                                              (rest removed))))))))
-            ;;@TODO: make it obvious we've lost our combo
-            (reset-combo state))))
+          (if reticule-ready?
+            (if good?
+              (-> state
+                  (assoc :halted? false)
+                  update-score
+                  update-combo
+                  update-countdown
+                  (common/update-sprites-by-pred
+                   (common/group-pred :dna)
+                   (fn [dna]
+                     (assoc dna :aminos
+                            (into clojure.lang.PersistentQueue/EMPTY
+                                  (map #(assoc % :vel [0 amino/amino-speed]))
+                                  (concat (filter :paired? aminos)
+                                          (cons updated-a
+                                                (rest removed))))))))
+              (reset-combo state))
+            state)))
       state)))
 
 (defn handle-reset
@@ -312,4 +327,4 @@
    :update-fn update-level-01
    :key-pressed-fns [handle-amino-input
                      handle-reset]
-   :mouse-pressed-fns [(fn [state e] (prn (:y e) (* 0.6 (q/height))) state)]})
+   :mouse-pressed-fns [(fn [state e] (prn (:x e) (:y e)) state)]})

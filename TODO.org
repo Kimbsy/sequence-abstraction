@@ -2,8 +2,6 @@
 
 ** TODO FIX PERFORMANCE ISSUES
 
-** TODO add "reticule"
-
 ** TODO get aminos moving nicely
 
 ** TODO get tutorial sorted
@@ -30,3 +28,5 @@
    CLOSED: [2021-10-23 Sat 12:20]
 ** DONE balance sound effects vs music volume
    CLOSED: [2021-10-23 Sat 14:30]
+** DONE add "reticule"
+   CLOSED: [2021-10-24 Sun 09:42]
