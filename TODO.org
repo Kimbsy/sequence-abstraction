@@ -36,3 +36,5 @@
    CLOSED: [2021-10-24 Sun 11:09]
 ** DONE use mono font everywhere
    CLOSED: [2021-10-24 Sun 16:26]
+** DONE Make combo and timer increments clearer
+   CLOSED: [2021-10-24 Sun 16:45]

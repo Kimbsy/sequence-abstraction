@@ -13,8 +13,8 @@
   []
   (qpsprite/image-sprite
    :time-sprite
-   [(* 0.5 (q/width)) (* 0.5 (q/height))]
-   48 48
+   [(* 0.8 (q/width)) (* 0.5 (q/height))]
+   96 96
    "img/time.png"
    :update-fn update-time
    :vel [(- (rand-int 5) 2.5) (- 3)]))

@@ -1,6 +1,7 @@
 (ns sequence-abstraction.sprites.countdown
   (:require [quil.core :as q]
             [quip.sprite :as qpsprite]
+            [quip.tween :as qptween]
             [sequence-abstraction.common :as common]))
 
 (defn seconds
@@ -27,20 +28,24 @@
     :color   color}))
 
 (defn draw-countdown
-  [{:keys [remaining] :as countdown}]
-  (let [color (if (< remaining 5)
+  [{:keys [active? remaining color] :as countdown}]
+  (let [color (if (and active?
+                       (< remaining 5))
                 common/sizzling-red
-                common/metallic-seaweed)]
+                color)]
     (draw-countdown-text (update countdown :pos #(map + % [-2 -2]))
                          common/cultured)
     (draw-countdown-text countdown color)))
 
 (defn update-countdown
-  [{:keys [remaining prev-time] :as countdown}]
+  [{:keys [active? remaining prev-time] :as countdown}]
   (let [now (System/currentTimeMillis)
-        dt  (/ (- now prev-time) 1000)]
+        dt  (/ (- now prev-time) 1000)
+        new (if active?
+              (max 0 (- remaining dt))
+              remaining)]
     (-> countdown
-        (assoc :remaining (max 0 (- remaining dt)))
+        (assoc :remaining new)
         (assoc :prev-time now))))
 
 (defn ->countdown
@@ -48,9 +53,26 @@
   {:sprite-group :countdown
    :uuid         (java.util.UUID/randomUUID)
    :pos          pos
+   :color        common/metallic-seaweed
+   :active?      true
    :remaining    remaining
    :prev-time    (System/currentTimeMillis)
    :font-large   (q/create-font "font/UbuntuMono-Regular.ttf" 120)
    :font-small   (q/create-font "font/UbuntuMono-Regular.ttf" 70)
    :update-fn    update-countdown
    :draw-fn      draw-countdown})
+
+(defn add-time
+  [countdown d]
+  (-> countdown
+      (assoc :active? false)
+      (assoc :color common/sea-green-crayola)
+      (qptween/add-tween
+       (qptween/->tween
+        :remaining
+        3
+        :step-count 50
+        :on-complete-fn (fn [c]
+                          (-> c
+                              (assoc :active? true)
+                              (assoc :color common/metallic-seaweed)))))))

@@ -13,8 +13,8 @@
   []
   (qpsprite/image-sprite
    :combo-sprite
-   [(* 0.5 (q/width)) (* 0.5 (q/height))]
-   48 48
+   [(* 0.2 (q/width)) (* 0.5 (q/height))]
+   96 96
    "img/combo.png"
    :update-fn update-combo
    :vel [(- (rand-int 5) 2.5) (- 3)]))

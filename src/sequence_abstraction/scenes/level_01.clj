@@ -167,7 +167,8 @@
   (common/update-sprites-by-pred
    state
    (common/group-pred :countdown)
-   #(update % :remaining + d)))
+   (fn [c]
+     (countdown/add-time c d))))
 
 (defn sprites
   []
