@@ -17,7 +17,7 @@
 (defn draw-menu
   [state]
   (qpu/background common/jet)
-  (common/draw-scene-sprites-by-layers state sprite-layers))
+  (qpsprite/draw-scene-sprites-by-layers state sprite-layers))
 
 (defn update-menu
   [state]
@@ -59,9 +59,9 @@
                         :init-fn (fn [state]
                                    (qpsound/stop-music)
                                    (qpsound/loop-music "music/level-music-50.wav")
-                                   (common/update-sprites-by-pred
+                                   (qpsprite/update-sprites-by-pred
                                     state
-                                    (common/group-pred :countdown)
+                                    (qpsprite/group-pred :countdown)
                                     (fn [c]
                                       (assoc c :prev-time (System/currentTimeMillis))))))
     state))

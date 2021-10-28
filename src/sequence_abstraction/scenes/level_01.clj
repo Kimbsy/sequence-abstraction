@@ -38,17 +38,17 @@
 (defn draw-level-01
   [{:keys [playing?] :as state}]
   (qpu/background common/jet)
-  (common/draw-scene-sprites-by-layers state sprite-layers)
+  (qpsprite/draw-scene-sprites-by-layers state sprite-layers)
 
   (when-not playing?
-    (common/draw-scene-sprites-by-layers state sprite-layers :sprite-key :game-over-sprites)))
+    (qpsprite/draw-scene-sprites-by-layers state sprite-layers :sprite-key :game-over-sprites)))
 
 (defn stop-aminos
   [{:keys [current-scene] :as state}]
   (-> state
       (assoc :halted? true)
-      (common/update-sprites-by-pred
-       (common/group-pred :dna)
+      (qpsprite/update-sprites-by-pred
+       (qpsprite/group-pred :dna)
        (fn [dna]
          (update dna :aminos
                  (fn [aminos]
@@ -72,9 +72,9 @@
 
 (defn update-scores
   [{:keys [score combo] :as state}]
-  (common/update-sprites-by-pred
+  (qpsprite/update-sprites-by-pred
    state
-   (common/group-pred :score)
+   (qpsprite/group-pred :score)
    (fn [s]
      (-> s
          (assoc :score (score/clean-score-str score))
@@ -84,8 +84,8 @@
   "Set the progress of the combo and time containers"
   [state]
   (-> state
-      (common/update-sprites-by-pred
-       (common/group-pred :container)
+      (qpsprite/update-sprites-by-pred
+       (qpsprite/group-pred :container)
        (fn [{:keys [progress-key] :as container}]
          (let [p (progress-key state)]
            (assoc container :progress p))))))
@@ -96,23 +96,23 @@
   (if intro?
     state
     (let [last-y (->> (get-in state [:scenes current-scene :sprites])
-                      (filter (common/group-pred :dna))
+                      (filter (qpsprite/group-pred :dna))
                       first
                       dna/last-pos
                       second)]
       (if (< -10 last-y)
-        (common/update-sprites-by-pred
+        (qpsprite/update-sprites-by-pred
          state
-         (common/group-pred :dna)
+         (qpsprite/group-pred :dna)
          dna/add-more-aminos)
         state))))
 
 (defn remove-old
   "Remove any aminos that are safely off screen"
   [state]
-  (common/update-sprites-by-pred
+  (qpsprite/update-sprites-by-pred
    state
-   (common/group-pred :dna)
+   (qpsprite/group-pred :dna)
    (fn [dna]
      (update dna :aminos
              (fn [aminos]
@@ -127,7 +127,7 @@
   (if intro?
     state
     (let [remaining (some->> (get-in state [:scenes current-scene :sprites])
-                             (filter (common/group-pred :countdown))
+                             (filter (qpsprite/group-pred :countdown))
                              first
                              :remaining)]
          (if (and remaining
@@ -187,9 +187,9 @@
 
 (defn inc-remaining
   [state d]
-  (common/update-sprites-by-pred
+  (qpsprite/update-sprites-by-pred
    state
-   (common/group-pred :countdown)
+   (qpsprite/group-pred :countdown)
    (fn [c]
      (countdown/add-time c d))))
 
@@ -295,9 +295,9 @@
 
 (defn remove-amino-from-buffer
   [{:keys [current-scene] :as state}]
-  (common/update-sprites-by-pred
+  (qpsprite/update-sprites-by-pred
    state
-   (common/group-pred :buffer)
+   (qpsprite/group-pred :buffer)
    (fn [buffer]
      (update buffer :aminos pop))))
 
@@ -340,8 +340,8 @@
   (sound/miss)
   (-> state
       (assoc :combo common/starting-combo)
-      (common/update-sprites-by-pred
-       (common/group-pred :reticule)
+      (qpsprite/update-sprites-by-pred
+       (qpsprite/group-pred :reticule)
        reticule/shake)))
 
 (defn handle-amino-input
@@ -353,10 +353,10 @@
              (#{:c :a :t :g} k))
       (let [sprites (get-in state [:scenes current-scene :sprites])
             {:keys [aminos]} (->> sprites
-                                  (filter (common/group-pred :dna))
+                                  (filter (qpsprite/group-pred :dna))
                                   first)
             reticule (->> sprites
-                          (filter (common/group-pred :reticule))
+                          (filter (qpsprite/group-pred :reticule))
                           first)
             removed   (remove :paired? aminos)
             a         (first removed)
@@ -374,8 +374,8 @@
                   update-score
                   update-combo
                   update-countdown
-                  (common/update-sprites-by-pred
-                   (common/group-pred :dna)
+                  (qpsprite/update-sprites-by-pred
+                   (qpsprite/group-pred :dna)
                    (fn [dna]
                      (assoc dna :aminos
                             (into clojure.lang.PersistentQueue/EMPTY
@@ -504,9 +504,9 @@
 
 (defn modify-text
   [state f]
-  (common/update-sprites-by-pred
+  (qpsprite/update-sprites-by-pred
    state
-   (common/group-pred :conversation)
+   (qpsprite/group-pred :conversation)
    f))
 
 (defn clear-text
@@ -530,8 +530,8 @@
 (defn multi-aminos
   [{:keys [current-scene] :as state}]
   (-> state
-      (common/update-sprites-by-pred
-       (common/group-pred :dna)
+      (qpsprite/update-sprites-by-pred
+       (qpsprite/group-pred :dna)
        (fn [dna]
          (-> (dna/->dna)
              (dna/add-amino \G)
@@ -614,8 +614,8 @@
   [state]
   (-> state
       (assoc :intro? false)
-      (common/update-sprites-by-pred
-       (common/group-pred :dna)
+      (qpsprite/update-sprites-by-pred
+       (qpsprite/group-pred :dna)
        (fn [dna]
          (-> (dna/->dna)
              dna/add-more-aminos)))))
