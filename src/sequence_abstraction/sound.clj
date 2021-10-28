@@ -1,60 +1,5 @@
 (ns sequence-abstraction.sound
-  (:require [clojure.java.io :as io])
-  (:import javax.sound.sampled.AudioSystem
-           javax.sound.sampled.Clip
-           javax.sound.sampled.DataLine$Info
-           javax.sound.sampled.LineListener))
-
-(defonce ^:dynamic *music* (atom nil))
-
-(def close-line-on-end-listener
-  (reify LineListener
-    (update [this line-event]
-      (when (= "Stop" (.toString (.getType line-event)))
-        (future (.close (.getLine line-event)))))))
-
-(defn get-line
-  [line-info mixer-info]
-  (or (->> (map (fn [mi]
-                  (try (.getLine (AudioSystem/getMixer mi) line-info)
-                       (catch Exception e)))
-                mixer-info)
-           (remove nil?)
-           first)
-      (AudioSystem/getLine line-info)))
-
-(defn play
-  ([sound]
-   (play sound false))
-  ([sound loop?]
-   (let [input-stream (io/input-stream (io/resource (str "sound/" sound)))
-         audio-stream (AudioSystem/getAudioInputStream input-stream)
-         audio-format (.getFormat audio-stream)
-         line-info    (DataLine$Info. Clip audio-format)
-         mixer-info   (AudioSystem/getMixerInfo)
-         line         (get-line line-info mixer-info)
-         audio-clip   (cast Clip line)]
-     (.open audio-clip audio-stream)
-     (if loop?
-       (.loop audio-clip Clip/LOOP_CONTINUOUSLY)
-       (.addLineListener line close-line-on-end-listener))
-     (.start audio-clip)
-     audio-clip)))
-
-(defn stop
-  [clip]
-  (.stop clip))
-
-(defn stop-music
-  []
-  (stop @*music*))
-
-(defn loop-music
-  [track]
-  (when @*music*
-    (stop-music))
-  (reset! *music* (play track true)))
-
+  (:require [quip.sound :as qpsound]))
 
 (def blips
   ["fx/blip1-quiet.wav"
@@ -63,16 +8,16 @@
 
 (defn blip
   []
-  (play (rand-nth blips)))
+  (qpsound/play (rand-nth blips)))
 
 (defn combo
   []
-  (play "fx/combo-quiet.wav"))
+  (qpsound/play "fx/combo-quiet.wav"))
 
 (defn countdown
   []
-  (play "fx/countdown-quiet.wav"))
+  (qpsound/play "fx/countdown-quiet.wav"))
 
 (defn miss
   []
-  (play "fx/miss-quiet.wav"))
+  (qpsound/play "fx/miss-quiet.wav"))

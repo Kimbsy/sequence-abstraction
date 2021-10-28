@@ -176,7 +176,7 @@
         remove-old
         update-scores
         update-containers
-        qpscene/update-scene-sprites
+        qpsprite/update-scene-sprites
         remove-nil-sprites
         qptween/update-sprite-tweens
         check-end
